@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gamebook Manager</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Estilo global -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <!-- Barra superior -->
+  <header id="top-bar">
+    <div id="app-title">Gamebook Manager</div>
+
+    <div id="ui-language-selector">
+      <label for="ui-language"><span id="ui-language-label"></span></label>
+      <select id="ui-language"></select>
+    </div>
+  </header>
+
+  <!-- Biblioteca -->
+  <main id="library"></main>
+
+  <!-- Home do Livro -->
+  <main id="book-home" style="display: none;"></main>
+
+  <!-- Leitor -->
+  <main id="game" style="display: none;"></main>
+
+  <!-- Boot da aplicação -->
+  <script type="module" src="./loader.js"></script>
+
+</body>
+</html>

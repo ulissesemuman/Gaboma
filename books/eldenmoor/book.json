@@ -1,0 +1,11 @@
+{
+  "id": "eldenmoor",
+  "title": "The Oath of Eldenmoor",
+  "author": "Ulisses Farias",
+  "version": "1.0.0",
+  "languages": ["pt-br", "en-us"],
+  "defaultLanguage": "pt-br",
+  "start": "intro",
+  "cover": "assets/cover.png",
+  "summary": "Uma fantasia sombria sobre juramentos, corrupção e destino."
+}
