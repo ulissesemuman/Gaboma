@@ -10,7 +10,7 @@ async function fetchJSON(path) {
   return res.json();
 }
 
-// ---------- Biblioteca ----------
+// ---------- Library ----------
 
 export async function loadLibrary() {
   const index = await fetchJSON("books/index.json");
@@ -22,17 +22,6 @@ export async function loadLibrary() {
 
   return state.books;
 }
-
-/*export async function loadBookLocalizedData(bookId, uiLang) {
-  const basePath = `books/${bookId}/language`;
-
-  try {
-    return await fetchJSON(`${basePath}/${uiLang}.json`);
-  } catch {
-    const book = state.books.find(b => b.id === bookId);
-    return fetchJSON(`${basePath}/${book.defaultLanguage}.json`);
-  }
-}*/
 
 export async function loadBookLocalizedData(bookId, language) {
   const index = await fetchJSON(
@@ -52,7 +41,7 @@ export async function loadBookLocalizedData(bookId, language) {
   return data;
 }
 
-// ---------- Livro ----------
+// ---------- Book ----------
 
 export async function loadBookStory(bookId) {
   return fetchJSON(`books/${bookId}/story/story.json`);

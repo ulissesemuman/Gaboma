@@ -1,5 +1,7 @@
 {
   "library.title": "Biblioteca",
   "library.read": "Ler",
-  "ui.language": "Idioma da interface"
+  "ui.language": "Idioma da interface",
+  "book.start": "Iniciar",
+  "book.loading": "Carregando..."
 }

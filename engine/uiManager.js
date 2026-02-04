@@ -1,6 +1,5 @@
 import state from "./state.js";
-import { loadLibrary } from "./bookManager.js";
-import { loadBookLocalizedData } from "./bookManager.js";
+import { loadLibrary, loadBookLocalizedData } from "./bookManager.js";
 import { loadUILanguage, loadBookLanguage, t } from "./i18n.js";
 
 // ---------- Utils ----------
@@ -54,28 +53,6 @@ function renderUIText() {
 
 // ---------- Library ----------
 
-/*async function renderLibrary() {
-  const libraryEl = document.getElementById("library");
-  libraryEl.innerHTML = `<h1>${t("library.title")}</h1>`;
-
-  Object.values(state.books).forEach(book => {
-    const card = document.createElement("div");
-    card.className = "book-card";
-
-    card.innerHTML = `
-      <h2>${book.title}</h2>
-      <p>${book.description}</p>
-      <button>${t("library.read")}</button>
-    `;
-
-    card.querySelector("button").onclick = () => {
-      openBook(book.id);
-    };
-
-    libraryEl.appendChild(card);
-  });
-}*/
-
 async function renderLibrary() {
   const libraryEl = document.getElementById("library");
   libraryEl.innerHTML = `<h1>${t("library.title")}</h1>`;
@@ -96,7 +73,7 @@ async function renderLibrary() {
     `;
 
     card.querySelector("button").onclick = () => {
-      openBook(book.id);
+      openBookHome(book.id);
     };
 
     libraryEl.appendChild(card);
@@ -105,6 +82,74 @@ async function renderLibrary() {
 
 
 // ---------- Book Home ----------
+
+export async function openBookHome(bookId) {
+  // elementos
+  const libraryEl = document.getElementById("library");
+  const homeEl = document.getElementById("book-home");
+  const gameEl = document.getElementById("game");
+
+  // alternar telas
+  libraryEl.style.display = "none";
+  gameEl.style.display = "none";
+  homeEl.style.display = "block";
+
+  const book = state.books[bookId];
+
+  const lang =
+    book.defaultLanguage ||
+    state.uiLanguage;
+
+  const localized = await loadBookLocalizedData(bookId, lang);
+
+  homeEl.innerHTML = `
+    <div class="book-home-content">
+      <img
+        class="book-cover"
+        src="books/${bookId}/assets/cover.png"
+        alt="${localized.title}"
+      />
+
+      <h1>${localized.title}</h1>
+      <p>${localized.summary}</p>
+
+      <label>
+        ${t("ui.language")}
+        <select id="book-language"></select>
+      </label>
+
+      <div class="book-home-actions">
+        <button id="start-book">
+          ${t("book.start")}
+        </button>
+      </div>
+    </div>
+  `;
+
+  renderBookLanguageSelector(bookId, lang);
+}
+
+async function renderBookLanguageSelector(bookId, selectedLang) {
+  const select = document.getElementById("book-language");
+
+  const index = await fetch(
+    `books/${bookId}/language/index.json`
+  ).then(r => r.json());
+
+  index.languages.forEach(lang => {
+    const option = document.createElement("option");
+    option.value = lang;
+    option.textContent = lang;
+    option.selected = lang === selectedLang;
+    select.appendChild(option);
+  });
+
+  select.onchange = () => {
+    state.books[bookId].defaultLanguage = select.value;
+    state.save();
+    openBookHome(bookId); // re-render
+  };
+}
 
 async function openBook(bookId) {
   state.currentBookId = bookId;

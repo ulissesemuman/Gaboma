@@ -1,0 +1,10 @@
+.book-home {
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+}
+
+.book-cover {
+  max-width: 300px;
+  margin-bottom: 1rem;
+}
