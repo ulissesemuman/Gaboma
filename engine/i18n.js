@@ -18,6 +18,7 @@ async function fetchJSON(path) {
 export async function loadUILanguage(lang) {
   const data = await fetchJSON(`language/${lang}.json`);
   state.uiLanguage = lang;
+  state.save();
   uiLanguageData = data;
 }
 

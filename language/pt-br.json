@@ -1,7 +1,12 @@
 {
   "library.title": "Biblioteca",
   "library.read": "Ler",
-  "ui.language": "Idioma da interface",
+  "ui.chooseLanguage": "Escolha o idioma da interface",
+  "ui.config": "Configuração",
+  "ui.library": "Biblioteca",
+  "ui.bookHome": "Início do Livro",
   "book.start": "Iniciar",
-  "book.loading": "Carregando..."
+  "book.loading": "Carregando...",
+  "book.continue": "Continuar",
+  "book.chooseLanguage": "Escolha o idioma do livro"
 }
