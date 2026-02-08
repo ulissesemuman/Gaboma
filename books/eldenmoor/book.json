@@ -7,5 +7,7 @@
   "defaultLanguage": "pt-br",
   "start": "intro",
   "cover": "assets/cover.png",
-  "summary": "Uma fantasia sombria sobre juramentos, corrupção e destino."
+  "summary": "Uma fantasia sombria sobre juramentos, corrupção e destino.",
+  "defaultTheme": "parchment",
+  "defaultFont": "crimson"
 }

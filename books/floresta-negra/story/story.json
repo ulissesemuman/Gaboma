@@ -1,0 +1,19 @@
+{
+  "id": "floresta-negra",
+  "start": "intro",
+  "chapters": {
+    "intro": {
+      "text": "intro.text",
+      "choices": [
+        { "text": "intro.start", "next": "village" }
+      ]
+    },
+
+    "village": {
+      "text": "village.default",
+      "choices": [
+        { "text": "village.forest", "next": "forest" }
+      ]
+    }
+  }
+}

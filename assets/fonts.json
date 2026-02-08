@@ -1,0 +1,32 @@
+{
+  "google-fonts": [
+    {
+      "id": "crimson",
+      "name": "Crimson Text"
+    },
+    {
+      "id": "baskerville",
+      "name": "Libre Baskerville"
+    },
+    {
+      "id": "lora",
+      "name": "Lora"
+    },
+    {
+      "id": "cormorant",
+      "name": "Cormorant Garamond"
+    },
+    {
+      "id": "cinzel",
+      "name": "Cinzel"
+    },
+    {
+      "id": "garamond",
+      "name": "EB Garamond"
+    },
+    {
+      "id": "merriweather",
+      "name": "Merriweather"
+    }
+  ]
+}

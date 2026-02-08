@@ -5,37 +5,46 @@
   <title>Gamebook Manager</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link id="dynamic-fonts" href="" rel="stylesheet">
 
   <!-- Estilo global -->
   <link rel="stylesheet" href="./style.css" />
 </head>
-<body>
+<body data-theme="gaboma">
+  <div id="app-frame">
+    <!-- Barra superior -->
+    <header id="top-bar">
+      <div id="app-title">Gaboma - Gamebook Manager</div>
+    </header>
 
-  <!-- Barra superior -->
-  <header id="top-bar">
-    <div id="app-title">Gamebook Manager</div>
+    <!-- Biblioteca -->
+    <main id="library"></main>
 
-    <div id="ui-language-selector">
-      <label for="ui-language"><span id="ui-language-label"></span></label>
-      <select id="ui-language"></select>
+    <!-- Home do Livro -->
+    <main id="book-home" style="display: none;"></main>
+
+    <!-- Leitor -->
+    <main id="game" style="display: none;"></main>
+
+    <!-- Barra inferior -->
+    <footer id="bottom-bar"></footer>
+
+    <!-- Popup de Configurações -->
+    <div id="config-overlay" style="display: none;">
+      <div id="config-popup">
+
+      </div>
     </div>
-  </header>
+  </div>
 
-  <!-- Biblioteca -->
-  <main id="library"></main>
+  <!-- Dialog Overlay -->
+  <div id="dialog-overlay" style="display: none;">
+    <div id="dialog-box">
+      <h2 id="dialog-title"></h2>
+      <p id="dialog-message"></p>
 
-  <!-- Home do Livro -->
-  <main id="book-home" style="display: none;"></main>
-
-  <!-- Leitor -->
-  <main id="game" style="display: none;"></main>
-
-  <!-- Barra inferior -->
-  <footer id="bottom-bar"></footer>
-
-  <!-- Popup de Configurações -->
-  <div id="config-overlay" style="display: none;">
-    <div id="config-popup"></div>
+      <div id="dialog-buttons"></div>
+    </div>
   </div>  
 
   <!-- Boot da aplicação -->

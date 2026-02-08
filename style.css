@@ -1,7 +1,359 @@
+:root {
+  --backdrop-bg: #00000052; /* preto com 50% de opacidade */
+
+  --ui-bg: #1a1a1a;
+  --ui-text: #f0f0f0;
+
+  --paper-bg: #fdfaf3;
+  --paper-text: #2b2b2b;
+
+  --button-bg: #444;
+  --button-text: #fff;
+  --button-hover-bg: #666;  
+
+  --bottom-bar-bg: #222;
+
+  --config-overlay-bg: rgba(0, 0, 0, 0.6);
+  --config-popup-bg: #fff;
+  --config-popup-text: #000;
+}
+
+body[data-theme="light"] {
+  --backdrop-bg: #ffffffaa;
+
+  --ui-bg: #ffffff;
+  --ui-text: #111;
+
+  --paper-bg: #ffffff;
+  --paper-text: #222;
+
+  --button-bg: #e0e0e0;
+  --button-text: #000;
+  --button-hover-bg: #cfcfcf;
+
+  --bottom-bar-bg: #f5f5f5;
+
+  --config-overlay-bg: rgba(0, 0, 0, 0.3);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #111;
+}
+
+body[data-theme="dark"] {
+  --backdrop-bg: #00000088;
+
+  --ui-bg: #0f0f0f;
+  --ui-text: #e0e0e0;
+
+  --paper-bg: #1b1b1b;
+  --paper-text: #dddddd;
+
+  --button-bg: #333;
+  --button-text: #fff;
+  --button-hover-bg: #555;
+
+  --bottom-bar-bg: #111;
+
+  --config-overlay-bg: rgba(0, 0, 0, 0.75);
+  --config-popup-bg: #1e1e1e;
+  --config-popup-text: #eee;
+}
+
+body[data-theme="parchment"] {
+  --backdrop-bg: #3a2b1b88;
+
+  --ui-bg: #2f2418;
+  --ui-text: #f4ecd8;
+
+  --paper-bg: #f4ecd8;
+  --paper-text: #3a2c1a;
+
+  --button-bg: #6b4e2e;
+  --button-text: #f4ecd8;
+  --button-hover-bg: #8a673e;
+
+  --bottom-bar-bg: #24190f;
+
+  --config-overlay-bg: rgba(30, 20, 10, 0.7);
+  --config-popup-bg: #f4ecd8;
+  --config-popup-text: #3a2c1a;
+}
+
+body[data-theme="light-green"] {
+  --backdrop-bg: #d8f5e888;
+
+  --ui-bg: #e8f8f0;
+  --ui-text: #0f3b2e;
+
+  --paper-bg: #f3fff9;
+  --paper-text: #134e3a;
+
+  --button-bg: #a7e4c7;
+  --button-text: #063d2b;
+  --button-hover-bg: #7fd8b5;
+
+  --bottom-bar-bg: #c9f0de;
+
+  --config-overlay-bg: rgba(0, 80, 50, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #0f3b2e;
+}
+
+body[data-theme="dark-green"] {
+  --backdrop-bg: #001a1088;
+
+  --ui-bg: #0b2e24;
+  --ui-text: #d8fff0;
+
+  --paper-bg: #123d30;
+  --paper-text: #e0fff4;
+
+  --button-bg: #1e5c47;
+  --button-text: #ffffff;
+  --button-hover-bg: #2b7a5f;
+
+  --bottom-bar-bg: #071f18;
+
+  --config-overlay-bg: rgba(0, 40, 25, 0.75);
+  --config-popup-bg: #123d30;
+  --config-popup-text: #e0fff4;
+}
+
+body[data-theme="light-red"] {
+  --backdrop-bg: #ffd6d688;
+
+  --ui-bg: #fff0f0;
+  --ui-text: #5a1111;
+
+  --paper-bg: #fff7f7;
+  --paper-text: #661818;
+
+  --button-bg: #ffb3b3;
+  --button-text: #4a0c0c;
+  --button-hover-bg: #ff8f8f;
+
+  --bottom-bar-bg: #ffdede;
+
+  --config-overlay-bg: rgba(120, 0, 0, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #5a1111;
+}
+
+body[data-theme="dark-red"] {
+  --backdrop-bg: #2a000088;
+
+  --ui-bg: #3a0f0f;
+  --ui-text: #ffdede;
+
+  --paper-bg: #4a1616;
+  --paper-text: #ffe5e5;
+
+  --button-bg: #7a1f1f;
+  --button-text: #fff;
+  --button-hover-bg: #a52c2c;
+
+  --bottom-bar-bg: #220909;
+
+  --config-overlay-bg: rgba(80, 0, 0, 0.75);
+  --config-popup-bg: #4a1616;
+  --config-popup-text: #ffe5e5;
+}
+
+body[data-theme="light-blue"] {
+  --backdrop-bg: #d6ecff88;
+  --ui-bg: #eef7ff;
+  --ui-text: #123a5a;
+  --paper-bg: #ffffff;
+  --paper-text: #1a4f7a;
+  --button-bg: #b3dbff;
+  --button-text: #0d3555;
+  --button-hover-bg: #8ecaff;
+  --bottom-bar-bg: #d9efff;
+  --config-overlay-bg: rgba(0, 60, 120, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #123a5a;
+}
+
+body[data-theme="dark-blue"] {
+  --backdrop-bg: #00153388;
+  --ui-bg: #0a1f3a;
+  --ui-text: #e0f0ff;
+  --paper-bg: #132c52;
+  --paper-text: #f0f8ff;
+  --button-bg: #1f4a80;
+  --button-text: #fff;
+  --button-hover-bg: #2d69b3;
+  --bottom-bar-bg: #08182b;
+  --config-overlay-bg: rgba(0, 20, 50, 0.75);
+  --config-popup-bg: #132c52;
+  --config-popup-text: #f0f8ff;
+}
+
+body[data-theme="yellow"] {
+  --backdrop-bg: #fff6cc88;
+  --ui-bg: #fffbe6;
+  --ui-text: #665500;
+  --paper-bg: #fffdf2;
+  --paper-text: #806600;
+  --button-bg: #ffe066;
+  --button-text: #4d3d00;
+  --button-hover-bg: #ffd633;
+  --bottom-bar-bg: #fff2b3;
+  --config-overlay-bg: rgba(120, 100, 0, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #665500;
+}
+
+body[data-theme="pink"] {
+  --backdrop-bg: #ffd6eb88;
+  --ui-bg: #ffe6f2;
+  --ui-text: #661144;
+  --paper-bg: #fff5fa;
+  --paper-text: #801a55;
+  --button-bg: #ffb3d9;
+  --button-text: #4d0033;
+  --button-hover-bg: #ff80c1;
+  --bottom-bar-bg: #ffd9ec;
+  --config-overlay-bg: rgba(120, 0, 80, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #661144;
+}
+
+body[data-theme="purple"] {
+  --backdrop-bg: #e6d6ff88;
+  --ui-bg: #f3ecff;
+  --ui-text: #3d1a66;
+  --paper-bg: #faf5ff;
+  --paper-text: #4b1f80;
+  --button-bg: #c2a3ff;
+  --button-text: #2a004d;
+  --button-hover-bg: #a87dff;
+  --bottom-bar-bg: #e6d9ff;
+  --config-overlay-bg: rgba(60, 0, 120, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #3d1a66;
+}
+
+body[data-theme="orange"] {
+  --backdrop-bg: #ffe0cc88;
+  --ui-bg: #fff2e6;
+  --ui-text: #663300;
+  --paper-bg: #fff8f2;
+  --paper-text: #804000;
+  --button-bg: #ffb366;
+  --button-text: #4d2600;
+  --button-hover-bg: #ff9933;
+  --bottom-bar-bg: #ffd9b3;
+  --config-overlay-bg: rgba(120, 60, 0, 0.25);
+  --config-popup-bg: #ffffff;
+  --config-popup-text: #663300;
+}
+
+body[data-theme="brown"] {
+  --backdrop-bg: #3b2a1a88;
+  --ui-bg: #4a3420;
+  --ui-text: #f2e6d9;
+  --paper-bg: #e8dccf;
+  --paper-text: #3a2a1a;
+  --button-bg: #6b4a2e;
+  --button-text: #fff;
+  --button-hover-bg: #8c6239;
+  --bottom-bar-bg: #3a2818;
+  --config-overlay-bg: rgba(40, 25, 15, 0.75);
+  --config-popup-bg: #e8dccf;
+  --config-popup-text: #3a2a1a;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--backdrop-bg);
+}
+
 body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  align-items: center;
+  justify-content: center;  
   font-family: serif;
-  background: #111;
-  color: #eee;
+  font-size: clamp(14px, 1.8vh, 22px);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;  
+  overflow-y: auto;
+  padding: 1rem;    
+  padding-bottom: 100px;
+}
+
+button {
+  display: block;
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--button-hover-bg);
+}
+
+#app-frame {
+  height: 100vh;
+  aspect-ratio: 2 / 3; /* largura:altura = 1:1.5 */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+
+#book-home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;  
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+.book-home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.book-cover-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.book-cover {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.book-summary {
+  flex-shrink: 0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.book-actions {
+  flex-shrink: 0;
+  padding: 1rem;
 }
 
 #game {
@@ -10,30 +362,21 @@ body {
   padding: 20px;
 }
 
-button {
-  display: block;
-  margin: 10px 0;
-  padding: 10px;
-  width: 100%;
-  background: #333;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #555;
+#library,
+#book-home,
+#game {
+  background: var(--paper-bg);
+  color: var(--paper-text);
 }
 
 #bottom-bar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
   display: flex;
-  gap: 1rem;
+  flex-shrink: 0;
   justify-content: center;
+  align-items: center;
+  gap: 1rem;
   padding: 0.75rem;
-  background: #222;
+  background: var(--bottom-bar-bg);
 }
 
 #bottom-bar button {
@@ -43,14 +386,70 @@ button:hover {
 #config-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
+  background: var(--config-overlay-bg);
+  display: none;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
 #config-popup {
-  background: #fff;
-  padding: 1.5rem;
-  min-width: 300px;
+  background: var(--config-popup-bg);
+  color: var(--config-popup-text);
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 280px;
+  font-family: sans-serif;
+}
+
+.config-section {
+  margin-top: 12px;
+}
+
+.config-section label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+#dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#dialog-box {
+  background: var(--config-popup-bg);
+  color: var(--config-popup-text);
+  padding: 24px;
+  border-radius: 8px;
+  width: min(90%, 400px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+#dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+#dialog-buttons button {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+#dialog-message {
+  white-space: pre-line;
+}
+
+@media (max-width: 600px) {
+  #app-frame {
+    height: 100vh;
+    width: 100vw;
+    aspect-ratio: auto;
+  }
 }

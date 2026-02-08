@@ -1,13 +1,16 @@
-const STORAGE_KEY = "gamebook.state";
+const STORAGE_KEY = "gaboma_state";
 
 const state = {
   // ----- Interface -----
   uiLanguage: "en-us",
   availableUILanguages: [],
   currentView: null, // "library", "book-home", "book-reading"
+  theme: null,  
+  uiFont: null,
+  defaultTheme: "gaboma",
+  defaultFont: "crimson",
 
   // ----- Biblioteca -----
-  books: {},            // { [bookId]: bookManifest }
   currentBookId: null,
 
   // ----- Livro atual -----
@@ -25,8 +28,11 @@ const state = {
   save() {
     const payload = {
       uiLanguage: this.uiLanguage,
-      currentBook: this.currentBook,
-      bookState: this.bookState
+      currentBookId: this.currentBookId,
+      currentBookLanguage: this.currentBookLanguage,
+      bookState: this.bookState,
+      theme: this.theme,
+      uiFont: this.uiFont
     };
 
     try {
@@ -45,8 +51,11 @@ const state = {
 
       // futura migração de versão aqui
       this.uiLanguage = data.uiLanguage ?? this.uiLanguage;
-      this.currentBook = data.currentBook ?? null;
+      this.currentBookId = data.currentBookId ?? null;
+      this.currentBookLanguage = data.currentBookLanguage ?? null;
       this.bookState = data.bookState ?? {};
+      this.theme = data.theme ?? this.theme;
+      this.uiFont = data.uiFont ?? this.uiFont;
     } catch (err) {
       console.error("Erro ao carregar estado:", err);
     }
@@ -54,6 +63,18 @@ const state = {
 
   clear() {
     localStorage.removeItem(STORAGE_KEY);
+  },
+
+  ensureBookState(bookId) {
+    if (!state.bookState[bookId]) {
+      state.bookState[bookId] = {
+        language: null,
+        currentChapter: null,
+        flags: {}
+      };
+    }
+
+    return state.bookState[bookId];
   },
 
   hasProgress(bookId) {
