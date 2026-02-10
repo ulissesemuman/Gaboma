@@ -24,7 +24,7 @@
     <main id="book-home" style="display: none;"></main>
 
     <!-- Leitor -->
-    <main id="game" style="display: none;"></main>
+    <main id="reader" style="display: none;"></main>
 
     <!-- Barra inferior -->
     <footer id="bottom-bar"></footer>
@@ -38,14 +38,25 @@
   </div>
 
   <!-- Dialog Overlay -->
-  <div id="dialog-overlay" style="display: none;">
-    <div id="dialog-box">
+  <div id="dialog-overlay" class="dialog-overlay" aria-hidden="true">
+    <div
+      id="dialog-box"
+      class="dialog-box"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-message"
+    >
       <h2 id="dialog-title"></h2>
-      <p id="dialog-message"></p>
 
-      <div id="dialog-buttons"></div>
+      <div class="dialog-content">
+        <div id="dialog-icon" class="dialog-icon"></div>
+        <div id="dialog-message" class="dialog-message"></div>
+      </div>
+
+      <div id="dialog-buttons" class="dialog-buttons"></div>
     </div>
-  </div>  
+  </div>
 
   <!-- Boot da aplicação -->
   <script type="module" src="./loader.js"></script>

@@ -2,25 +2,28 @@ const STORAGE_KEY = "gaboma_state";
 
 const state = {
   // ----- Interface -----
-  uiLanguage: "en-us",
+  uiLanguage: null,
   availableUILanguages: [],
   currentView: null, // "library", "book-home", "book-reading"
   theme: null,  
   uiFont: null,
   defaultTheme: "gaboma",
-  defaultFont: "crimson",
+  defaultUIFont: "crimson",
 
   // ----- Biblioteca -----
   currentBookId: null,
 
   // ----- Livro atual -----
   currentBookLanguage: null,
+  currentBookChapter: null,
 
   // ----- Progresso por livro -----
   bookState: {
      // [bookId]: {
      //   language: "pt-br",
      //   currentChapter: "intro",
+     //   theme: "gaboma",
+     //   font: "crimson",
      //   flags: {},
      //}
   },
@@ -28,8 +31,6 @@ const state = {
   save() {
     const payload = {
       uiLanguage: this.uiLanguage,
-      currentBookId: this.currentBookId,
-      currentBookLanguage: this.currentBookLanguage,
       bookState: this.bookState,
       theme: this.theme,
       uiFont: this.uiFont
@@ -51,8 +52,6 @@ const state = {
 
       // futura migração de versão aqui
       this.uiLanguage = data.uiLanguage ?? this.uiLanguage;
-      this.currentBookId = data.currentBookId ?? null;
-      this.currentBookLanguage = data.currentBookLanguage ?? null;
       this.bookState = data.bookState ?? {};
       this.theme = data.theme ?? this.theme;
       this.uiFont = data.uiFont ?? this.uiFont;
@@ -70,6 +69,8 @@ const state = {
       state.bookState[bookId] = {
         language: null,
         currentChapter: null,
+        theme: null,
+        font: null,
         flags: {}
       };
     }
@@ -80,15 +81,6 @@ const state = {
   hasProgress(bookId) {
     const progress = this.bookState?.[bookId];
     return progress && progress.currentChapter;
-  },
-
-  startBook(bookId, language) {
-    this.bookState[bookId] = {
-      language,
-      currentChapter: "intro",
-      flags: {}
-    };
-    this.save();
   }
 };
 

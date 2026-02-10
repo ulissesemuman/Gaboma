@@ -1,5 +1,18 @@
 import state from "./state.js";
 import { Utils } from "./utils.js";
+import { t } from "./i18n.js";
+import { ThemeManager } from "./themeManager.js";
+import { FontManager } from "./fontManager.js";
+
+// ---------- Manifest ----------
+
+export async function loadBookManifest(bookId) {
+  if (!bookId) {
+    throw new Error(t("error.invalidBook"));
+  }
+
+  return Utils.fetchJSON(`books/${bookId}/book.json`);
+}
 
 // ---------- Library ----------
 
@@ -8,11 +21,11 @@ let libraryCache = null;
 export async function loadLibrary() {
   if (libraryCache) return libraryCache;
 
-  const index = await Utils.fetchJSON("books/index.json");
+  const index = await loadBooksList();
   const books = {};
 
   for (const bookId of index.books) {
-    const manifest = await Utils.fetchJSON(`books/${bookId}/book.json`);
+    const manifest = await loadBookManifest(bookId);
     books[bookId] = manifest;
   }
 
@@ -24,106 +37,80 @@ export function resetLibraryCache() {
   libraryCache = null;
 }
 
-export async function loadBookLocalizedData(bookId, language) {
-  const index = await Utils.fetchJSON(
-    `books/${bookId}/language/index.json`
-  );
+// ---------- Localization ----------
 
-  let lang = language;
-
-  if (!index.languages.includes(lang)) {
-    lang = index.languages[0];
+export async function loadBookLanguageList(bookId) {
+  if (!bookId) {
+    throw new Error(t("error.invalidBook"));
   }
 
-  const data = await Utils.fetchJSON(
-    `books/${bookId}/language/${lang}.json`
+  return Utils.fetchJSON(
+    `books/${bookId}/language/index.json`
   );
-
-  return data;
 }
 
-// Cache interno
+export async function loadBookLocalizedData(bookId) {
+  if (!bookId) {
+    throw new Error(t("error.invalidBook"));
+  }
+
+  const language = await resolveBookLanguage(bookId);
+
+  return Utils.fetchJSON(
+    `books/${bookId}/language/${language}.json`
+  );
+}
+
+export async function resolveBookLanguage(bookId) {
+  const index = await loadBookLanguageList(bookId);
+  const available = index.languages;
+
+  const savedBookLang =
+    state.bookState?.[bookId]?.language;
+
+  if (savedBookLang) {
+    return savedBookLang;
+  }
+
+  if (available.includes(state.uiLanguage)) {
+    return state.uiLanguage;
+  }
+
+  const manifest = await loadBookManifest(bookId);
+
+  if (manifest.defaultLanguage) {
+    return manifest.defaultLanguage;
+  }
+
+  return available[0];
+}
+
 const booksLanguageCache = {};
 
-/**
- * Carrega os dados de idioma de TODOS os livros.
- * Aplica fallback em cadeia:
- * 1) idioma solicitado
- * 2) idioma salvo no state.bookState[bookId]
- * 3) defaultLanguage do manifest
- * 4) primeiro idioma disponível
- */
-export async function loadAllBooksLocalizedData(language) {
-  const booksIndex = await Utils.fetchJSON("books/index.json");
-
+export async function loadAllBooksLocalizedData() {
+  const booksIndex = await loadBooksList();
   const result = {};
 
   for (const bookId of booksIndex.books) {
+    const language = await resolveBookLanguage(bookId);
 
-    // 1️⃣ Se já estiver em cache, reutiliza
-    if (
-      booksLanguageCache[bookId] &&
-      booksLanguageCache[bookId][language]
-    ) {
+    if (booksLanguageCache[bookId] &&
+      booksLanguageCache[bookId][language]) {
       result[bookId] = booksLanguageCache[bookId][language];
       continue;
     }
 
-    // 2️⃣ Carrega manifest
-    const manifest = await Utils.fetchJSON(
-      `books/${bookId}/book.json`
-    );
-
-    // 3️⃣ Carrega índice de idiomas do livro
-    const langIndex = await Utils.fetchJSON(
-      `books/${bookId}/language/index.json`
-    );
-
-    const available = langIndex.languages;
-
-    // ---------- FALLBACK EM CADEIA ----------
-    let finalLang = language;
-
-    if (!available.includes(finalLang)) {
-
-      // tenta idioma salvo no state
-      const savedLang =
-        state.bookState?.[bookId]?.language;
-
-      if (savedLang && available.includes(savedLang)) {
-        finalLang = savedLang;
-      }
-
-      // tenta defaultLanguage do manifest
-      else if (
-        manifest.defaultLanguage &&
-        available.includes(manifest.defaultLanguage)
-      ) {
-        finalLang = manifest.defaultLanguage;
-      }
-
-      // fallback final
-      else {
-        finalLang = available[0];
-      }
-    }
-
-    // 4️⃣ Carrega arquivo de idioma
-    const localizedData = await Utils.fetchJSON(
-      `books/${bookId}/language/${finalLang}.json`
-    );
+    const localizedData = await loadBookLocalizedData(bookId, language);
 
     const bookLocalized = {
-      language: finalLang,
-      manifest,           // opcional: já devolve manifest
+      language: language,
       data: localizedData
     };
 
-    // 5️⃣ Atualiza cache
     if (!booksLanguageCache[bookId]) {
       booksLanguageCache[bookId] = {};
     }
-    booksLanguageCache[bookId][finalLang] = bookLocalized;
+    booksLanguageCache[bookId][language] = bookLocalized;
 
     result[bookId] = bookLocalized;
   }
@@ -131,18 +118,27 @@ export async function loadAllBooksLocalizedData(language) {
   return result;
 }
 
+export function resetBooksLanguageCache() {
+  for (const key in booksLanguageCache) {
+    delete booksLanguageCache[key];
+  } 
+}  
+
 // ---------- Book ----------
 
 let currentBook = null;
 const bookCache = new Map();
 
-export async function loadBookStory(bookId) {
-  return fetchJSON(`books/${bookId}/story/story.json`);
+async function loadBooksList() {
+  return Utils.fetchJSON("books/index.json");
 }
 
-export async function loadBookLanguages(bookId) {
-  const index = await fetchJSON(`books/${bookId}/language/index.json`);
-  return index.languages;
+async function loadBookStory(bookId) {
+  if (!bookId) {
+    throw new Error(t("error.invalidBook"));
+  }
+
+  return Utils.fetchJSON(`books/${bookId}/story/story.json`);
 }
 
 export function getCurrentBook() {
@@ -159,6 +155,28 @@ export function setCurrentBook(bookData) {
   state.save();
 }
 
+export async function setBookState(bookId) {
+  if (!bookId) {
+    throw new Error(t("error.invalidBook"));
+  }
+
+  const manifest = await loadBookManifest(bookId);
+  const defaultStartChapter = manifest.start;
+
+  const currentBookChapter = state.currentBookChapter || defaultStartChapter;
+  const lang = await resolveBookLanguage(bookId);
+  const font = FontManager.resolveFont();
+  const theme = ThemeManager.resolveTheme(bookId);
+ 
+  state.ensureBookState(bookId);
+ 
+  state.bookState[bookId].currentChapter = currentBookChapter
+  state.bookState[bookId].language = lang;
+  state.bookState[bookId].font = font;
+  state.bookState[bookId].theme = theme;
+  state.save();
+ }
+
 export async function loadBook(bookId) {
   if (bookCache.has(bookId)) {
     const book = bookCache.get(bookId);
@@ -166,8 +184,8 @@ export async function loadBook(bookId) {
     return book;
   }
 
-  const manifest = await Utils.fetchJSON(`books/${bookId}/book.json`);
-  const story = await Utils.fetchJSON(`books/${bookId}/story/story.json`);
+  const manifest = await loadBookManifest(bookId);
+  const story = await loadBookStory(bookId);
 
   const book = {
     ...manifest,
@@ -181,9 +199,15 @@ export async function loadBook(bookId) {
 }
 
 export const BookManager = {
+  loadBookManifest,
   loadLibrary, 
-  loadBookLocalizedData, 
+  resetLibraryCache,
+  resolveBookLanguage,
   loadAllBooksLocalizedData, 
+  resetBooksLanguageCache,
+  loadBookLanguageList,
+  loadBookLocalizedData, 
+  setBookState,
   getCurrentBook, 
   setCurrentBook, 
   loadBook

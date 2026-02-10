@@ -9,5 +9,15 @@
   "cover": "assets/cover.png",
   "summary": "Uma fantasia sombria sobre juramentos, corrupção e destino.",
   "defaultTheme": "parchment",
-  "defaultFont": "crimson"
+  "defaultFont": "crimson",
+
+  "home": {
+    "showTitle": false,
+    "showSummary": false,
+    "cover": {
+      "front": "cover.jpg",
+      "back": "back-cover.jpg",
+      "allowFlip": true
+    }
+  }  
 }
