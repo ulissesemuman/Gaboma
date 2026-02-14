@@ -1,0 +1,64 @@
+{
+  "variables": {
+    "strength": {
+      "type": "number",
+      "initial": 5,
+      "min": 0,
+      "max": 20,
+      "showInSheet": true,
+      "label": "var.strength"
+    },
+
+    "life": {
+      "type": "number",
+      "initial": 10,
+      "min": 0,
+      "showInSheet": true,
+      "label": "var.life",
+      "fatalAtZero": true
+    },
+
+    "maxLife": {
+      "type": "derived",
+      "formula": "10 + strength * 2",
+      "showInSheet": true,
+      "label": "var.maxLife"
+    },
+
+    "secretFlag": {
+      "type": "boolean",
+      "initial": false,
+      "showInSheet": false
+    }
+  },
+
+  "items": {
+    "sword": {
+      "label": "item.sword",
+      "category": "weapon",
+      "description": "item.sword.desc",
+      "icon": "sword.svg",
+      "stackable": false,
+      "weight": 5,
+      "effect": {
+        "onAcquire": [
+          { "type": "modifyVariable", "target": "strength", "value": 2 }
+        ]
+      }
+    },
+
+    "potion": {
+      "label": "item.potion",
+      "category": "consumable",
+      "description": "item.potion.desc",
+      "icon": "potion.svg",
+      "stackable": true,
+      "weight": 1,
+      "effect": {
+        "onUse": [
+          { "type": "modifyVariable", "target": "life", "value": 5 }
+        ]
+      }
+    }
+  }
+}

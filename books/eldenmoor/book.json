@@ -10,13 +10,16 @@
   "summary": "Uma fantasia sombria sobre juramentos, corrupção e destino.",
   "defaultTheme": "parchment",
   "defaultFont": "crimson",
-
+  "dice": {
+    "count": 2,
+    "sides": 6
+  },
   "home": {
-    "showTitle": false,
-    "showSummary": false,
+    "showTitle": true,
+    "showSummary": true,
     "cover": {
-      "front": "cover.jpg",
-      "back": "back-cover.jpg",
+      "front": "cover.png",
+      "back": "back-cover.png",
       "allowFlip": true
     }
   }  

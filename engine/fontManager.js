@@ -2,19 +2,51 @@ import state from "./state.js";
 import { BookManager } from "./bookManager.js";
 import { Utils } from "./utils.js";
 
-export function setFont(font) {
-  document.body.setAttribute("data-font", font);
-
-  state.uiFont = font;
-  state.save();
+export async function getFontsList() {
+  return Utils.fetchJSON("assets/fonts.json");
 }
 
-export function resolveFont(bookId) {
+async function setFont(fontId, bookId = null) {
+  if (!fontId) {
+    fontId = resolveFont(bookId);
+  }
+
+  const data = await getFontsList();
+  const font = data["google-fonts"].find(f => f.id === fontId);
+
+  if (!font) return;
+
+  if (bookId) {
+    if (state.currentView === "book-home" || state.currentView === "reader") {
+      document.body.style.fontFamily = `"${font.name}", serif`;
+    }
+
+    const bookState = state.bookState?.[bookId];
+
+    if (bookState) {
+      bookState.font = fontId;
+      state.save();
+    }
+    else{
+    if (state.currentView === "library") {
+      document.body.style.fontFamily = `"${font.name}", serif`;
+    }
+
+      throw new Error("getFontsList: " + t("error.bookNotFound", { bookId }));
+    }
+  }
+  else {
+    state.uiFont = fontId;
+    state.save();
+  }
+}
+
+export function resolveFont(bookId = null) {
   let font = null
 
   if (bookId) {
-  const bookState = state.bookState?.[bookId]; 
-  const book = BookManager.getCurrentBook();
+    const bookState = state.bookState?.[bookId]; 
+    const book = BookManager.getCurrentBook();
 
     if (bookState && bookState.font) {
       return bookState.font;
@@ -32,12 +64,8 @@ export function resolveFont(bookId) {
   return font;
 }
 
-export async function getFontList() {
-  return Utils.fetchJSON("assets/fonts.json");
-}
-
 async function loadGoogleFonts() {
-  const data = await getFontList();
+  const data = await getFontsList();
   const fonts = data["google-fonts"];
 
   if (!fonts || fonts.length === 0) return;
@@ -54,29 +82,14 @@ async function loadGoogleFonts() {
   link.href = href;
 
   if (state.uiFont) {
-    setUIFont(state.uiFont);
+    //setFont(state.uiFont);
   }
-}
-
-export async function setUIFont(fontId) {
-  if (!fontId) {
-    fontId = resolveFont();
-  }
-
-  const data = await getFontList();
-  const font = data["google-fonts"].find(f => f.id === fontId);
-
-  if (!font) return;
-
-  document.body.style.fontFamily = `"${font.name}", serif`;
-
-  state.uiFont = fontId;
-  state.save();
 }
 
 export const FontManager = {
-  loadGoogleFonts,
+  getFontsList,
+  setUIFont: (fontId) => setFont(fontId, null),
+  setBookFont: (bookId, fontId) => setFont(fontId, bookId),
   resolveFont,
-  setUIFont,
-  getFontList
- };
+  loadGoogleFonts,
+};  

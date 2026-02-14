@@ -1,13 +1,74 @@
 import state from "./state.js";
 import { BookManager } from "./bookManager.js";
 import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t } from "./i18n.js";
-import { renderCurrentChapter } from "./reader.js";
-import { Utils } from "./utils.js";
+import { Reader } from "./reader.js";
 import { ThemeManager } from "./themeManager.js";
 import { FontManager } from "./fontManager.js";
 import { DialogManager } from "./dialogManager.js";
 
 // ---------- UI ----------
+
+function clearUI() {
+  const views = ["library", "book-home", "reader"];
+
+  views.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = "none";
+      el.innerHTML = "";
+    }
+  });
+
+  document.getElementById("bottom-bar").innerHTML = "";  
+
+  document.body.classList.remove("modal-open");
+}
+
+function renderCurrentView() {
+  switch (state.currentView) {
+    case "library":
+      openLibrary();
+      break;
+
+    case "book-home":
+      openBookHome();
+      break;
+
+    case "reader":
+      renderReader(state.currentBookChapter);
+      break;
+
+    default:
+      console.warn(t("ui.unknownView", { view: state.currentView }));
+      openLibrary();
+  }
+}
+
+function prepareView(viewId) {
+  const viewEl = document.getElementById(viewId);
+
+  if (!viewEl) {
+    console.warn(t("ui.unknownView", { view: viewId }));
+    return null;
+  }
+
+  clearUI();
+
+  viewEl.style.display = "block";
+
+  state.currentView = viewId;  
+
+  renderBottomBar();
+
+  return viewEl;
+}
+
+function applyUIVisualIdentity() {
+  ThemeManager.setUITheme();
+  FontManager.setUIFont();
+}
+
+// ---------- UI Language ----------
 
 function resolveUILanguage() {
   const available = state.availableUILanguages;
@@ -40,70 +101,6 @@ function resolveUILanguage() {
   return available[0];
 }
 
-function clearUI() {
-  const views = ["library", "book-home", "reader"];
-
-  views.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.display = "none";
-      el.innerHTML = "";
-    }
-  });
-
-  document.getElementById("bottom-bar").innerHTML = "";  
-
-  document.body.classList.remove("modal-open");
-}
-
-function prepareView(viewId) {
-  clearUI();
-
-  state.currentView = viewId;
-
-  const viewEl = document.getElementById(viewId);
-
-  if (!viewEl) {
-    console.warn(t("view.notFound", { viewId }));
-    return null;
-  }
-
-  viewEl.style.display = "block";
-
-  renderBottomBar();
-
-  return viewEl;
-}
-
-function renderCurrentView() {
-  switch (state.currentView) {
-    case "library":
-      openLibrary();
-      break;
-
-    case "book-home":
-      openBookHome(state.currentBookId);
-      break;
-
-    case "reader":
-      renderReader(state.currentBookId);
-      applyBookVisualIdentity(BookManager.getCurrentBook());
-      break;
-
-    default:
-      console.warn(t("view.unknown", { view: state.currentView }));
-      openLibrary();
-  }
-}
-
-function applyUIVisualIdentity() {
-  ThemeManager.setTheme();
-
-  FontManager.setUIFont();
-}
-
-// ---------- UI Language ----------
-
 function bindUILanguageSelector(selectEl) {
   if (!selectEl) {
     throw new Error("bindUILanguageSelector: " + t("error.elementNotFound", { element: "#selectEl" }));
@@ -127,8 +124,8 @@ function bindUILanguageSelector(selectEl) {
 
 async function setUILanguage(lang) {
   await loadUILanguage(lang);
+
   renderCurrentView();
-  renderBottomBar();
 
   if (isConfigPopupOpen()) {
     renderConfigPopup();
@@ -148,8 +145,6 @@ async function openLibrary() {
 
   const localized = await BookManager.loadAllBooksLocalizedData(); 
 
-  applyUIVisualIdentity();
-
   renderLibrary(books, localized);
 }
 
@@ -159,6 +154,8 @@ function renderLibrary(books, localized) {
   if (!libraryEl) {
     throw new Error("renderLibrary: " + t("error.elementNotFound", { element: "#library" }));
   }
+
+  applyUIVisualIdentity();  
 
   libraryEl.innerHTML = `<h1>${t("library.title")}</h1>`;
 
@@ -173,7 +170,8 @@ function renderLibrary(books, localized) {
     `;
 
     card.querySelector("button").onclick = () => {
-      openBookHome(book.id);
+      state.currentBookId = book.id;
+      openBookHome();
     };
 
     libraryEl.appendChild(card);
@@ -182,62 +180,102 @@ function renderLibrary(books, localized) {
 
 // ---------- Book Home ----------
 
-async function openBookHome(bookId) {
+async function openBookHome() {
 
+  const bookId = state.currentBookId;
   let book = BookManager.getCurrentBook();  
 
   if (bookId !== state.currentBookId || !book) {
-    book = await BookManager.loadBook(bookId);
+    await BookManager.loadBook(bookId);
 
     if (!state.bookState?.[bookId]) {
       await BookManager.setBookState(bookId);
     }
   }
 
-  applyBookVisualIdentity(book);
-
   const localized = await BookManager.loadBookLocalizedData(bookId);
+  const bookHomeConfig = await BookManager.getBookHomeConfig(bookId);  
 
-  renderBookHome(localized);
+  renderBookHome(bookId, localized, bookHomeConfig);
 }
 
-function renderBookHome(localized) {
+function renderBookHome(bookId, localized, bookHomeConfig) {
 
   const homeEl = prepareView("book-home");
   if (!homeEl) {
     throw new Error("renderBookHome: " + t("error.elementNotFound", { element: "#book-home" }));
   }
 
-  const bookId = state.currentBookId;
+  applyBookVisualIdentity(bookId);  
+
+  const coverConfig = bookHomeConfig.cover;
+  let coverImg = coverConfig.front;
 
   homeEl.innerHTML = `
     <div class="book-home-container">
-      <div class="book-cover-wrapper">
+      <div id="book-cover-wrapper" class="book-cover-wrapper">
         <img
+          id="book-cover"
           class="book-cover"
-          src="books/${bookId}/assets/cover.png"
+          src="books/${bookId}/assets/covers/${coverImg}"
           alt="${localized.title}"
         />
+        <button id="toggle-cover" title="Virar capa">
+          ↺
+        </button>
       </div>
 
-      <div class="book-summary">
-        <h1>${localized.title}</h1>
-        <p>${localized.summary}</p>
-      </div>        
+      <div id="book-summary" class="book-summary">
+        <h1 id="book-title">${localized.title}</h1>
+        <p id="book-summary-text">${localized.summary}</p>
+      </div>
 
       <div class="book-actions">
-        <button id="start-book">
+        <button id="book-action">
           ${t("book.start")}
         </button>
       </div>
     </div>
   `;
 
-  if (state.hasProgress(bookId)) {
-    document.getElementById("continue-book").onclick = () => {
-      renderReader(bookId);
-    };
+  if (!bookHomeConfig.showTitle)
+  {
+    document.getElementById("book-title").style.display = "none";
   }
+
+  if (!bookHomeConfig.showSummary)
+  {
+    document.getElementById("book-title").style.display = "none";
+  }
+
+  if (!bookHomeConfig.showTitle  && !bookHomeConfig.showSummary)
+  {
+    document.getElementById("book-summary").style.display = "none";
+  }
+
+  if (coverConfig.allowFlip)
+  {
+    document.getElementById("toggle-cover").onclick = () => {
+      coverImg = coverImg === 
+        coverConfig.front ? coverConfig.back : coverConfig.front;
+
+      let img = document.getElementById("book-cover");
+
+      img.src = `books/${bookId}/assets/covers/${coverImg}`;
+    };
+  }   
+  else
+  {
+    document.getElementById("toggle-cover").style.display = "none";
+  }
+
+  if (state.hasProgress(bookId)) {
+    document.getElementById("book-action").textContent = t("book.continue");
+  }
+
+  document.getElementById("book-action").onclick = () => {
+    openReader();
+  };
 }
 
 function hasActiveBookContext() {
@@ -247,15 +285,9 @@ function hasActiveBookContext() {
   );
 }
 
-function applyBookVisualIdentity(book) {
-  const bookState = state.bookState[book.id] || {};
-
-  const theme = ThemeManager.resolveTheme(book.id);
-
-  const font = FontManager.resolveFont(book.id);
-
-  document.body.dataset.theme = theme;
-  document.body.dataset.font = font;
+function applyBookVisualIdentity(bookId) {
+  ThemeManager.setBookTheme(bookId);
+  FontManager.setBookFont(bookId);  
 }
 
 // ---------- Book Language ----------
@@ -292,25 +324,58 @@ async function bindBookLanguageSelector(selectEl) {
 
 // ---------- Reader ----------
 
- function renderReader(bookId, { reset = false } = {}) {
+async function openReader() {
+  const book = BookManager.getCurrentBook();
+  const story = book.story;
+
+  Reader.loadStory(story);
+
+  const chapter = Reader.startStory();
+
+  renderReader(chapter);
+}
+
+export function renderReader(chapter) {
   
-  const readerEl = prepareView("reader");
+ const readerEl = prepareView("reader");
   if (!readerEl) {
     throw new Error("renderReader: " + t("error.elementNotFound", { element: "#reader" }));
   }
 
-  readerEl.innerHTML = `<p>Lendo livro: ${bookId}</p>`;
+  applyBookVisualIdentity(state.currentBookId);  
 
-  if (reset || !state.hasProgress(bookId)) {
-    state.startNewBook(bookId);
+  // Texto
+  chapter.text.forEach(paragraph => {
+    const p = document.createElement("p");
+    p.textContent = paragraph;
+    readerEl.appendChild(p);
+  });
+
+  // Se não houver escolhas → fim
+  if (!chapter.choices || chapter.choices.length === 0) {
+    const endBtn = document.createElement("button");
+    endBtn.textContent = "Recomeçar";
+    endBtn.onclick = () => {
+      const newChapter = Reader.startStory();
+      renderReader(newChapter);
+    };
+
+    readerEl.appendChild(endBtn);
+    return;
   }
 
-  applyBookVisualIdentity(BookManager.getCurrentBook());
+  // Choices
+  chapter.choices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.textContent = choice.text;
 
-  state.currentBook = bookId;
-  state.save();
+    btn.onclick = () => {
+      const nextChapter = Reader.goToChapter(choice.next);
+      renderReader(nextChapter);
+    };
 
-  renderCurrentChapter();
+    readerEl.appendChild(btn);
+  });
 }
 
 // ---------- Button bar ----------
@@ -369,62 +434,84 @@ function openConfigPopup() {
 
 function renderConfigPopup() {
   const popup = document.getElementById("config-popup");
+  const hasBook = hasActiveBookContext();
 
   let html = `
-    <h2>${t("ui.settings")}</h2>
-
-    <div class="config-section">
-      <label for="ui-language">
-        ${t("ui.chooseUILanguage")}
-      </label>
-      <select id="ui-language"></select>
-    </div>
+      <h2>${t("ui.settings")}</h2>
   `;
 
   html += `
-    <div class="config-section">
-      <label for="theme-selector">
-        ${t("ui.theme")}
-      </label>
-      <select id="theme-selector">
-        <option value="gaboma">Gaboma</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="parchment">Parchment</option>
-        <option value="light-red">Light red</option>
-        <option value="dark-red">Dark red</option>
-        <option value="light-green">Light green</option>
-        <option value="dark-green">Dark green</option>
-        <option value="light-blue">Light blue</option>
-        <option value="dark-blue">Dark blue</option>
-        <option value="pink">Pink</option>
-        <option value="purple">Purple</option>
-        <option value="yellow">Yellow</option>
-        <option value="orange">Orange</option>
-        <option value="brown">Brown</option>
-      </select>
+    <div class="config-tabs">
+      <button class="config-tab active" data-tab="general">
+        Geral
+      </button>
+      <button class="config-tab" data-tab="book">
+        Livro Atual
+      </button>
     </div>
-  `;
+  `;  
 
   html += `
-    <div class="config-section">
-      <label for="font-selector">
-        ${t("ui.font")}
-      </label>
-      <select id="font-selector"></select>
-    </div>
-   ` 
+    <div class="config-content">
+  `;  
 
-  if (hasActiveBookContext()) {
-    html += `
-      <div class="config-section">
-        <label for="book-language">
-          ${t("ui.chooseBookLanguage")}
-        </label>
-        <select id="book-language"></select>
+  html += `
+      <div class="config-panel active" data-panel="general">
+
+        <div class="config-section">
+          <label for="ui-language-selector">
+            ${t("ui.chooseUILanguage")}
+          </label>
+          <select id="ui-language-selector"></select>
+        </div>
+
+        <div class="config-section">
+          <label for="ui-theme-selector">
+            ${t("ui.chooseUITheme")}
+          </label>
+          <select id="ui-theme-selector"></select>
+        </div>
+
+        <div class="config-section">
+          <label for="ui-font-selector">
+            ${t("ui.chooseUIfont")}
+          </label>
+          <select id="ui-font-selector"></select>
+        </div>
+
       </div>
-    `;
-  }
+  `;
+
+  html += `
+      <div class="config-panel" data-panel="book">
+
+        <div class="config-section">
+          <label for="book-language-selector">
+            ${t("ui.chooseBookLanguage")}
+          </label>
+          <select id="book-language-selector" ${!state.currentBookId ? "disabled" : ""}></select>
+        </div>
+
+        <div class="config-section">
+          <label for="book-theme-selector">
+            ${t("ui.chooseBookTheme")}
+          </label>
+          <select id="book-theme-selector" ${!state.currentBookId ? "disabled" : ""}></select>
+        </div>
+
+        <div class="config-section">
+          <label for="book-font-selector">
+            ${t("ui.chooseBookFont")}
+          </label>
+          <select id="book-font-selector" ${!state.currentBookId ? "disabled" : ""}></select>
+        </div>
+
+      </div>
+  `;
+
+  html += `
+    </div>
+  `;  
 
   html += `
     <div class="config-section">
@@ -436,50 +523,56 @@ function renderConfigPopup() {
 
   popup.innerHTML = html;
 
-  bindFontSelector("font-selector");  
-
-  document.getElementById("export-progress").onclick = exportState;
-  document.getElementById("reset-progress").onclick = resetState;
-  document.getElementById("import-progress").onclick = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if (file) {
-        importState(file);
-      } else {
-         showDialog({
-          title: t("ui.warning"),
-          message: t("ui.noFileSelected"),
-          buttons: [
-            { label: t("ui.ok"), value: true }
-          ]
-        }); 
-      }
-    };
-    input.click();
-  };    
-
-  const themeSelect = document.getElementById("theme-selector");
-  themeSelect.value = ThemeManager.resolveTheme(state.currentBookId);
-
-  themeSelect.onchange = e => {
-    ThemeManager.setTheme(e.target.value);
-  };  
-
-  // UI language
   bindUILanguageSelector(
-    popup.querySelector("#ui-language")
+    popup.querySelector("#ui-language-selector")
   );
 
-  // Book language (somente se existir)
-  if (hasActiveBookContext()) {
+  bindUIThemeSelector(
+    popup.querySelector("#ui-theme-selector")
+  );
+
+  bindUIFontSelector(
+    popup.querySelector("#ui-font-selector")
+  );    
+
+  if (state.currentBookId) {
     bindBookLanguageSelector(
-      popup.querySelector("#book-language")
+      popup.querySelector("#book-language-selector")
     );
+
+    bindBookThemeSelector(
+      popup.querySelector("#book-theme-selector")
+    );
+
+    bindBookFontSelector(
+      popup.querySelector("#book-font-selector")  
+    );    
   }
+
+  bindProgressButtons();
+  
+  bindConfigTabs()
 }
+
+function bindConfigTabs() {
+  const tabs = document.querySelectorAll(".config-tab");
+  const panels = document.querySelectorAll(".config-panel");
+
+  tabs.forEach(tab => {
+    tab.onclick = () => {
+      const target = tab.dataset.tab;
+
+      tabs.forEach(t => t.classList.remove("active"));
+      panels.forEach(p => p.classList.remove("active"));
+
+      tab.classList.add("active");
+      document
+        .querySelector(`[data-panel="${target}"]`)
+        .classList.add("active");
+    };
+  });
+}
+
 
 function isConfigPopupOpen() {
   const overlay = document.getElementById("config-overlay");
@@ -492,25 +585,111 @@ document.getElementById("config-overlay").onclick = (e) => {
   }
 };
 
+// ---------- Themes ----------
+
+async function bindUIThemeSelector(selectEl) {
+  if (!selectEl) {
+    throw new Error("bindThemeSelector: " + t("error.elementNotFound", { element: "#selectEl" }));
+  }
+
+  const themes = ThemeManager.getThemesList();
+  
+  selectEl.innerHTML = "";
+
+  themes.forEach(theme => {
+    const option = document.createElement("option");
+    option.value = theme.id;
+    option.textContent = theme.name;
+    selectEl.appendChild(option);
+  });
+
+  selectEl.value = ThemeManager.resolveTheme();
+
+  selectEl.onchange = e => {
+    ThemeManager.setUITheme(e.target.value);
+  };  
+}
+
+async function bindBookThemeSelector(selectEl) {
+  if (!selectEl) {
+    throw new Error("bindBookThemeSelector: " + t("error.elementNotFound", { element: "#selectEl" }));
+  }
+
+  const bookId = state.currentBookId;
+  const bookState = state.bookState[bookId];  
+
+  const themes = ThemeManager.getThemesList();
+  
+  selectEl.innerHTML = "";
+
+  themes.forEach(theme => {
+    const option = document.createElement("option");
+    option.value = theme.id;
+    option.textContent = theme.name;
+    selectEl.appendChild(option);
+  });
+
+  selectEl.value = ThemeManager.resolveTheme(bookId);
+
+  selectEl.onchange = e => {
+    bookState.theme = e.target.value;
+    state.save();
+
+    ThemeManager.setBookTheme(bookId, e.target.value);
+  };  
+}
+
 // ---------- Fonts ----------
 
-async function bindFontSelector(selectEl) {
-  const data = await FontManager.getFontList();
-  const select = document.getElementById(selectEl);
+async function bindUIFontSelector(selectEl) {
+  if (!selectEl) {
+    throw new Error("bindFontSelector: " + t("error.elementNotFound", { element: "#selectEl" }));
+  }
 
-  select.innerHTML = "";
+  const data = await FontManager.getFontsList();
+  
+  selectEl.innerHTML = "";
 
   data["google-fonts"].forEach(font => {
     const option = document.createElement("option");
     option.value = font.id;
     option.textContent = font.name;
-    select.appendChild(option);
+    selectEl.appendChild(option);
   });
 
-  select.value = FontManager.resolveFont();
+  selectEl.value = FontManager.resolveFont();
 
-  select.onchange = e => {
+  selectEl.onchange = e => {
     FontManager.setUIFont(e.target.value);
+  };
+}
+
+async function bindBookFontSelector(selectEl) {
+  if (!selectEl) {
+    throw new Error("bindBookFontSelector: " + t("error.elementNotFound", { element: "#selectEl" }));
+  }
+
+  const bookId = state.currentBookId;
+  const bookState = state.bookState[bookId];    
+
+  const data = await FontManager.getFontsList();
+  
+  selectEl.innerHTML = "";
+
+  data["google-fonts"].forEach(font => {
+    const option = document.createElement("option");
+    option.value = font.id;
+    option.textContent = font.name;
+    selectEl.appendChild(option);
+  });
+
+  selectEl.value = FontManager.resolveFont(bookId);
+
+  selectEl.onchange = e => {
+    bookState.font = e.target.value;
+    state.save();
+
+    FontManager.setBookFont(bookId, e.target.value);
   };
 }
 
@@ -521,7 +700,7 @@ async function exportState() {
   const payload = {
     uiLanguage: state.uiLanguage,
     bookState: state.bookState,
-    theme: state.theme,
+    theme: state.uiTheme,
     uiFont: state.uiFont
   };
 
@@ -570,12 +749,20 @@ async function importState(file) {
 
       state.uiLanguage = imported.uiLanguage ?? state.uiLanguage;
       state.bookState = imported.bookState ?? {};
-      state.theme = imported.theme ?? state.theme;
+      state.uiTheme = imported.theme ?? state.uiTheme;
       state.uiFont = imported.uiFont ?? state.uiFont;      
 
       state.save();
 
       renderCurrentView();
+
+      DialogManager.showDialog({
+        layout: "alert",
+        title: t("ui.success"),
+        message: t("ui.importProgressSuccess"),
+        icon: "success",
+        iconColor: "#4caf50"
+      });       
 
     } catch (e) {
         DialogManager.showDialog({
@@ -590,13 +777,6 @@ async function importState(file) {
 
   reader.readAsText(file);
 
-  await DialogManager.showDialog({
-    layout: "alert",
-    title: t("ui.success"),
-    message: t("ui.importProgressSuccess"),
-    icon: "success",
-    iconColor: "#4caf50"
-  });  
 }
 
 async function resetState() {
@@ -630,6 +810,35 @@ function isValidState(obj) {
     obj.bookState &&
     typeof obj.bookState === "object"
   );
+}
+
+function bindProgressButtons() {
+  const exportBtn = document.getElementById("export-progress");
+  const resetBtn = document.getElementById("reset-progress");
+  const importBtn = document.getElementById("import-progress");
+
+  if (exportBtn) exportBtn.onclick = exportState;
+  if (resetBtn) resetBtn.onclick = resetState;
+  if (importBtn) importBtn.onclick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        importState(file);
+      } else {
+         showDialog({
+          title: t("ui.warning"),
+          message: t("ui.noFileSelected"),
+          buttons: [
+            { label: t("ui.ok"), value: true }
+          ]
+        }); 
+      }
+    };
+    input.click();
+  };
 }
 
 // ---------- Init ----------

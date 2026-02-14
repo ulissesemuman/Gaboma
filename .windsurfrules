@@ -1,0 +1,57 @@
+# Arquitetura
+
+Visão geral: 
+- Este é um gerenciador de gamebooks estáticos ou dinâmicos, projetado para o navegador. O aplicativo é composto por um conjunto de módulos ES localizados em engine/ e livros JSON-backed localizados em books/. O aplicativo inicia loader.js, que chama UIManager.init() e espera ser servido sobre HTTP (a API nativa fetch é usada para JSON e recursos).
+
+- O código está organizado em módulos separados, com cada módulo responsável por uma funcionalidade específica.
+- Os principais módulos são:
+  - [engine/state.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/state.js:0:0-0:0): Gerenciamento do estado do aplicativo.
+  - [engine/Utils.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/Utils.js:0:0-0:0): Funções úteis para manipulação de dados e requisições HTTP.
+  - [engine/BookManager.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/BookManager.js:0:0-0:0): Gerenciamento de livros, incluindo carregamento de dados e manipulação de idiomas.
+  - [engine/i18n.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/i18n.js:0:0-0:0): Internacionalização de texto.
+  - [engine/fontManager.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/fontManager.js:0:0-0:0): Gerenciamento de fontes.
+  - [engine/UIManager.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/UIManager.js:0:0-0:0): Orquestração do UI, incluindo a inicialização e a manipulação de elementos do DOM.
+  - [engine/reader.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/reader.js:0:0-0:0): Renderização de capítulos do livro.
+
+# Estilo de nomenclatura
+
+- Funções e variáveis: camelCase
+- Classes e IDs do DOM: kebab-case
+
+# Convenções de código
+
+- Comentários para documentação e informações sobre a funcionalidade de cada componente.
+- Funções separadas para cada responsabilidade.
+- Nomes descritivos para funções, variáveis e IDs do DOM.
+- Uso de módulos ES para organizar o código em arquivos separados.
+- Uso de JSON para armazenar dados do livro.
+
+# Outras informações
+
+- O aplicativo é um gerenciador de gamebooks estáticos, com recursos de leitura, navegação e configuração.
+- O código é escrito em ES6 e usa a API nativa do navegador para manipulação de dados e elementos do DOM.
+- A internacionalização é feita usando JSONs com strings localizadas.
+- O código é servido sobre HTTP usando um servidor estático.
+
+# Data layout & patterns
+
+- Livros: `books/<bookId>/book.json` (manifest), `books/<bookId>/language/index.json` lista idiomas suportados, strings localizadas em `books/<bookId>/language/<lang>.json`, dados da história em `books/<bookId>/story/story.json`, recursos sob `books/<bookId>/assets/`.
+- Traduções da interface: `language/<lang>.json` com [language/index.json](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/language/index.json:0:0-0:0) listando idiomas da interface disponíveis.
+- Padrão de requisição de dados: os módulos geralmente usam uma função `fetchJSON` e dependem de requisições HTTP. Supõe-se que o aplicativo seja executado em um servidor estático local durante o desenvolvimento.
+
+# Cross-file conventions
+
+- Muitas interações do UI dependem de IDs específicos do DOM: `library`, `book-home`, `game`, `bottom-bar`, `ui-language`, `config-overlay`, `config-popup`. Use esses IDs ao adicionar elementos ou manipuladores de UI.
+- As traduções usam `t("key.path")` para a interface e `tb("key")` para as strings localizadas do livro — prefira esses helpers em vez de textos fixos.
+- Os módulos exportam funções com nomes; `UIManager` é exportado como um objeto com `init`.
+
+# Run / debug (fluxo de desenvolvimento)
+
+- Serva o projeto raiz sobre HTTP antes de abrir `index.html` (caso contrário, a requisição `fetch` falhará). Exemplos de comandos a serem executados a partir da raiz do projeto:
+
+```bash
+# Com node (recomendado):
+npx http-server -c-1 .
+
+# Ou com Python 3:
+python -m http.server 8000

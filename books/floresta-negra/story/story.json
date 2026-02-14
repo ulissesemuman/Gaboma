@@ -1,18 +1,88 @@
 {
-  "id": "floresta-negra",
   "start": "intro",
+
   "chapters": {
     "intro": {
-      "text": "intro.text",
+      "text": [
+        "Você acorda em uma clareira silenciosa.",
+        "Há dois caminhos à sua frente."
+      ],
       "choices": [
-        { "text": "intro.start", "next": "village" }
+        { "text": "Ir para a floresta", "next": "forest" },
+        { "text": "Seguir para a vila", "next": "village" }
+      ]
+    },
+
+    "forest": {
+      "text": [
+        "A floresta é densa e sombria.",
+        "Você ouve um ruído estranho."
+      ],
+      "choices": [
+        { "text": "Investigar o ruído", "next": "noise" },
+        { "text": "Voltar", "next": "intro" }
       ]
     },
 
     "village": {
-      "text": "village.default",
+      "text": [
+        "A vila parece abandonada.",
+        "Uma casa chama sua atenção."
+      ],
       "choices": [
-        { "text": "village.forest", "next": "forest" }
+        { "text": "Entrar na casa", "next": "house" },
+        { "text": "Voltar", "next": "intro" }
+      ]
+    },
+
+    "noise": {
+      "text": [
+        "Era apenas o vento.",
+        "Você respira aliviado."
+      ],
+      "choices": [
+        { "text": "Continuar explorando", "next": "deepForest" }
+      ]
+    },
+
+    "house": {
+      "text": [
+        "Dentro da casa há um mapa antigo."
+      ],
+      "choices": [
+        { "text": "Pegar o mapa e sair", "next": "map" }
+      ]
+    },
+
+    "deepForest": {
+      "text": [
+        "Você encontra uma ruína antiga."
+      ],
+      "choices": [
+        { "text": "Entrar na ruína", "next": "ruins" }
+      ]
+    },
+
+    "map": {
+      "text": [
+        "O mapa revela um tesouro escondido."
+      ],
+      "choices": [
+        { "text": "Seguir o mapa", "next": "treasure" }
+      ]
+    },
+
+    "ruins": {
+      "text": [
+        "Você descobre um portal misterioso.",
+        "Fim da demonstração."
+      ]
+    },
+
+    "treasure": {
+      "text": [
+        "Você encontra o tesouro.",
+        "Fim da demonstração."
       ]
     }
   }

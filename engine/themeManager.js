@@ -1,15 +1,56 @@
 import { BookManager } from "./bookManager.js";
 import state from "./state.js";
 
-export function setTheme(theme) {
+export function getThemesList() {
+  const themes = [
+    { id: "gaboma", name: "Gaboma" },
+    { id: "light", name: "Light" },
+    { id: "dark", name: "Dark" },
+    { id: "parchment", name: "Parchment" },
+    { id: "light-red", name: "Light red" },
+    { id: "dark-red", name: "Dark red" },  
+    { id: "light-green", name: "Light green" },
+    { id: "dark-green", name: "Dark green" },
+    { id: "light-blue", name: "Light blue" },
+    { id: "dark-blue", name: "Dark blue" },
+    { id: "pink", name: "Pink" },
+    { id: "purple", name: "Purple" },
+    { id: "yellow", name: "Yellow" },
+    { id: "orange", name: "Orange" },
+    { id: "brown", name: "Brown" },
+  ]; 
+
+  return themes;
+}
+
+export function setTheme(theme, bookId = null) {
   if (!theme) {
-    theme = resolveTheme();
+    theme = resolveTheme(bookId);
   }
 
-  document.body.setAttribute("data-theme", theme);
+  if (bookId) {
+    if (state.currentView === "book-home" || state.currentView === "reader") {
+      document.body.dataset.theme = theme;
+    }
 
-  state.theme = theme;
-  state.save();
+    const bookState = state.bookState?.[bookId];
+
+    if (bookState) {
+      bookState.theme = theme;
+      state.save();
+    }
+    else{
+      throw new Error("setTheme: " + t("error.bookNotFound", { bookId }));
+    }
+  }
+  else {
+    if (state.currentView === "library") {
+      document.body.dataset.theme = theme;
+    }
+
+    state.uiTheme = theme;
+    state.save();
+  }
 }
 
 export function resolveTheme(bookId) {
@@ -25,17 +66,19 @@ export function resolveTheme(bookId) {
 
     theme =
         book.defaultTheme ||
-        state.theme ||
-        state.defaultTheme;
+        state.uiTheme ||
+        state.defaultUITheme;
   }
   else {
-    theme = state.theme || state.defaultTheme;
+    theme = state.uiTheme || state.defaultUITheme;
   }
 
   return theme;
 }
 
 export const ThemeManager = {
-  setTheme,
+  getThemesList,
+  setUITheme: (theme) => setTheme(theme, null),
+  setBookTheme: (bookId, theme) => setTheme(theme, bookId),
   resolveTheme
 };

@@ -6,7 +6,7 @@ import { FontManager } from "./fontManager.js";
 
 // ---------- Manifest ----------
 
-export async function loadBookManifest(bookId) {
+async function loadBookManifest(bookId) {
   if (!bookId) {
     throw new Error(t("error.invalidBook"));
   }
@@ -72,14 +72,14 @@ export async function resolveBookLanguage(bookId) {
     return savedBookLang;
   }
 
-  if (available.includes(state.uiLanguage)) {
-    return state.uiLanguage;
-  }
-
   const manifest = await loadBookManifest(bookId);
 
   if (manifest.defaultLanguage) {
     return manifest.defaultLanguage;
+  }
+
+  if (available.includes(state.uiLanguage)) {
+    return state.uiLanguage;
   }
 
   return available[0];
@@ -198,8 +198,29 @@ export async function loadBook(bookId) {
   return book;
 }
 
+export async function getBookHomeConfig(bookId) {
+  if (!bookId) {
+    throw new Error(t("error.invalidBook"));
+  }
+
+  const manifest = await loadBookManifest(bookId);
+
+  const home = manifest?.home ?? {};
+  const cover = home?.cover ?? {};
+
+  return {
+    showTitle: home.showTitle ?? true,
+    showSummary: home.showSummary ?? true,
+
+    cover: {
+      front: cover.front ?? "cover.png",
+      back: cover.back ?? null,
+      allowFlip: cover.allowFlip ?? false
+    }
+  };
+}
+
 export const BookManager = {
-  loadBookManifest,
   loadLibrary, 
   resetLibraryCache,
   resolveBookLanguage,
@@ -210,5 +231,6 @@ export const BookManager = {
   setBookState,
   getCurrentBook, 
   setCurrentBook, 
-  loadBook
+  loadBook,
+  getBookHomeConfig
 };

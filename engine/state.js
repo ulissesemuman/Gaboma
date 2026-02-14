@@ -4,10 +4,10 @@ const state = {
   // ----- Interface -----
   uiLanguage: null,
   availableUILanguages: [],
-  currentView: null, // "library", "book-home", "book-reading"
-  theme: null,  
+  currentView: null, // "library", "book-home", "reader"
+  uiTheme: null,  
   uiFont: null,
-  defaultTheme: "gaboma",
+  defaultUITheme: "gaboma",
   defaultUIFont: "crimson",
 
   // ----- Biblioteca -----
@@ -31,9 +31,9 @@ const state = {
   save() {
     const payload = {
       uiLanguage: this.uiLanguage,
-      bookState: this.bookState,
-      theme: this.theme,
-      uiFont: this.uiFont
+      uiTheme: this.uiTheme,
+      uiFont: this.uiFont,
+      bookState: this.bookState
     };
 
     try {
@@ -52,9 +52,9 @@ const state = {
 
       // futura migração de versão aqui
       this.uiLanguage = data.uiLanguage ?? this.uiLanguage;
-      this.bookState = data.bookState ?? {};
-      this.theme = data.theme ?? this.theme;
+      this.uiTheme = data.uiTheme ?? this.uiTheme;
       this.uiFont = data.uiFont ?? this.uiFont;
+      this.bookState = data.bookState ?? {};
     } catch (err) {
       console.error("Erro ao carregar estado:", err);
     }
@@ -68,9 +68,9 @@ const state = {
     if (!state.bookState[bookId]) {
       state.bookState[bookId] = {
         language: null,
-        currentChapter: null,
         theme: null,
         font: null,
+        currentChapter: null,
         flags: {}
       };
     }

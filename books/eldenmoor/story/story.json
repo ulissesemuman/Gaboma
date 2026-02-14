@@ -1,18 +1,122 @@
 {
-  "id": "eldenmoor",
   "start": "intro",
+
   "chapters": {
     "intro": {
-      "text": "intro.text",
+      "text": [
+        "Você desperta em uma floresta silenciosa.",
+        "Há um caminho ao norte e uma trilha ao sul."
+      ],
+
       "choices": [
-        { "text": "intro.start", "next": "village" }
+        {
+          "id": "go_north",
+          "text": "Seguir para o norte",
+          "next": "north",
+          "conditions": {
+            "all": [
+              { "hasItem": "key" },
+              { "variableAtLeast": { "name": "strength", "value": 5 } }
+            ]
+          }
+        },
+        {
+          "id": "go_south",
+          "text": "Ir para o sul",
+          "next": "south"
+        }
       ]
     },
 
-    "village": {
-      "text": "village.default",
+    "north": {
+      "text": [
+        "Você encontra uma espada cravada numa pedra."
+      ],
+
       "choices": [
-        { "text": "village.forest", "next": "forest" }
+        {
+          "id": "take_sword",
+          "text": "Pegar a espada",
+          "next": "sword",
+          "conditions": {
+            "any": [
+              { "hasItem": "amulet" },
+              { "variableEquals": { "name": "faction", "value": "mages" } }
+            ]
+          }
+        },
+        {
+          "id": "ignore_sword",
+          "text": "Ignorar e seguir adiante",
+          "next": "forest"
+        }
+      ]
+    },
+
+    "south": {
+      "text": [
+        "Um velho mercador lhe oferece ajuda."
+      ],
+
+      "choices": [
+        {
+          "id": "accept_help",
+          "text": "Aceitar ajuda",
+          "next": "merchant",
+          "conditions": {
+            "all": [
+              { "hasItem": "key" },
+              { "variableAtLeast": { "name": "strength", "value": 5 } },
+              {"dice": {
+                    "count": 2,
+                    "sides": 6,
+                    "storeIn": "lastRoll",
+                    "min": 8
+                  }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "combate": {
+      "text": [
+        "O monstro ainda está de pé."
+      ],
+      "choices": [
+        {
+          "text": "Atacar novamente",
+          "next": "combate",
+          "effects": [
+            {
+              "type": "rollDice",
+              "storeIn": "attackRoll"
+            },
+            {
+              "type": "modifyVariable",
+              "target": "monsterHp",
+              "operation": "subtract",
+              "valueFromVariable": "attackRoll"
+            }
+          ],
+          "conditions": {
+            "variableGreaterThan": {
+              "name": "monsterHp",
+              "value": 0
+            }
+          }
+        },
+
+        {
+          "text": "Monstro derrotado",
+          "next": "vitoria",
+          "conditions": {
+            "variableLessOrEqual": {
+              "name": "monsterHp",
+              "value": 0
+            }
+          }
+        }
       ]
     }
   }

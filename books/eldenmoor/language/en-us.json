@@ -1,4 +1,14 @@
 {
   "title": "The Oath of Eldenmoor",
-  "summary": "An ancient prophecy awakens forgotten forces..."
+  "summary": "An ancient prophecy awakens forgotten forces...",
+  "item": {
+    "sword": "Espada",
+    "sword.desc": "Uma lâmina antiga forjada nas montanhas."
+  },
+
+  "var": {
+    "strength": "Força",
+    "life": "Vida",
+    "maxLife": "Vida Máxima"
+  }  
 }
