@@ -1,0 +1,12 @@
+{
+  "highlights": {
+  "eldenmoor": {
+      "label": "lore.eldenmoor",
+      "description": "Reino ancestral fundado há mil anos."
+  },
+  "archmage": {
+      "label": "lore.archmage",
+      "description": "Título concedido ao maior mago vivo."
+  }
+  }
+}

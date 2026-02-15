@@ -160,21 +160,48 @@ export async function setBookState(bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-  const manifest = await loadBookManifest(bookId);
+  const book = await getCurrentBook();
+  const { manifest, story } = book;
+
   const defaultStartChapter = manifest.start;
 
   const currentBookChapter = state.currentBookChapter || defaultStartChapter;
-  const lang = await resolveBookLanguage(bookId);
-  const font = FontManager.resolveFont();
+  const language = await resolveBookLanguage(bookId);
+  const font = FontManager.resolveFont(bookId);
   const theme = ThemeManager.resolveTheme(bookId);
  
   state.ensureBookState(bookId);
- 
-  state.bookState[bookId].currentChapter = currentBookChapter
-  state.bookState[bookId].language = lang;
-  state.bookState[bookId].font = font;
-  state.bookState[bookId].theme = theme;
-  state.save();
+
+  const initialVariables = {};
+  if (story.variables) {
+    Object.entries(story.variables).forEach(
+      ([id, config]) => {
+        initialVariables[id] = config.initial ?? 0;
+      }
+    );
+  }
+
+  const initialItems = {};
+  if (story.items) {
+    Object.entries(story.items).forEach(
+      ([id, config]) => {
+        initialItems[id] = config.initial ?? 0;
+      }
+    );
+  }  
+
+  state.persistGameData(bookId, {
+    progress: {
+      currentChapter: currentBookChapter
+    },
+    settings: {
+      language: language,
+      font: font,
+      theme: theme
+    },
+    variables: initialVariables,
+    items: initialItems
+  });
  }
 
 export async function loadBook(bookId) {

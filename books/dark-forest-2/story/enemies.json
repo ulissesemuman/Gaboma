@@ -1,0 +1,42 @@
+
+{
+  "enemies": {
+    "ice_mage": {
+      "label": "enemy.iceMage",
+      "description": "Um mago envolto em gelo.",
+      "hp": 12,
+      "attacks": [
+        {
+          "name": "Shard de Gelo",
+          "dice": { "count": 2, "sides": 6 },
+          "type": "magic"
+        }
+      ]
+    },
+
+    "orc": {
+      "label": "enemy.orc",
+      "description": "Um orc brutal.",
+      "hp": 8,
+      "attacks": [
+        {
+          "name": "Machado",
+          "dice": { "count": 1, "sides": 8 },
+          "type": "physical"
+        }
+      ]
+    }
+  },
+
+  "enemyInstances": {
+    "ice_mage_01": {
+      "type": "ice_mage"
+    },
+    "ice_mage_02": {
+      "type": "ice_mage"
+    },
+    "orc_guard": {
+      "type": "orc"
+    }
+  }
+}

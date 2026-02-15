@@ -1,0 +1,105 @@
+{
+  "start": "intro",
+
+  "chapters": {
+    "intro": {
+      "text": [
+        "chapter.intro.text.line_1",
+        "chapter.intro.text.line_2"
+      ],
+      "choices": [
+        { "text": "chapter.intro.choice.forest", "next": "forest" },
+        { "text": "chapter.intro.choice.village", "next": "village" }
+      ]
+    },
+
+    "forest": {
+      "text": [
+        "chapter.forest.text.line_1",
+        "chapter.forest.text.line_2"
+      ],
+      "choices": [
+        { "text": "chapter.forest.choice.noise", "next": "noise" },
+        { "text": "chapter.forest.choice.intro", "next": "intro" }
+      ]
+    },
+
+    "village": {
+      "text": [
+        "chapter.village.text.line_1",
+        "chapter.village.text.line_2"
+      ],
+      "choices": [
+        { "text": "chapter.village.choice.house", "next": "house" },
+        { "text": "chapter.village.choice.intro", "next": "intro" }
+      ]
+    },
+
+    "noise": {
+      "text": [
+        "chapter.noise.text.line_1",
+        "chapter.noise.text.line_2"
+      ],
+      "choices": [
+        { "text": "chapter.noise.choice.deepForest", "next": "deepForest" }
+      ]
+    },
+
+    "house": {
+      "text": [
+        "chapter.house.text.line_1"
+      ],
+      "choices": [
+        { "text": "chapter.house.choice.map", "next": "map" }
+      ]
+    },
+
+    "deepForest": {
+      "text": [
+        "chapter.deepForest.text.line_1"
+      ],
+      "choices": [
+        { "text": "chapter.deepForest.choice.ruins", "next": "mysterious_portal" }
+      ]
+    },
+
+    "map": {
+      "text": [
+        "chapter.map.text.line_1"
+      ],
+      "choices": [
+        { "text": "chapter.map.choice.treasure", "next": "treasure" }
+      ]
+    },
+
+    "mysterious_portal": {
+      "text": [
+        "chapter.mysterious_portal.text.line_1"
+      ],
+      "choices": [
+        {
+          "text": "chapter.mysterious_portal.choice.strike_with_axe",
+          "effects": { "increment": { "doorHits": 1 } },
+          "conditions": {
+            "variables": { "doorHits": 3 }
+          },
+          "repeatable": true,
+          "next": "ruins"
+        }
+      ]
+    },
+
+    "treasure": {
+      "text": [
+        "chapter.treasure.text.line_1",
+        "chapter.treasure.text.line_2"
+      ]
+    },
+
+    "ruins": {
+      "text": [
+        "chapter.ruins.text.line_1"
+      ]
+    }
+  }
+}

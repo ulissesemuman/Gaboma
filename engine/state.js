@@ -15,18 +15,9 @@ const state = {
 
   // ----- Livro atual -----
   currentBookLanguage: null,
-  currentBookChapter: null,
 
   // ----- Progresso por livro -----
-  bookState: {
-     // [bookId]: {
-     //   language: "pt-br",
-     //   currentChapter: "intro",
-     //   theme: "gaboma",
-     //   font: "crimson",
-     //   flags: {},
-     //}
-  },
+  bookState: {},
 
   save() {
     const payload = {
@@ -67,20 +58,82 @@ const state = {
   ensureBookState(bookId) {
     if (!state.bookState[bookId]) {
       state.bookState[bookId] = {
-        language: null,
-        theme: null,
-        font: null,
-        currentChapter: null,
-        flags: {}
+        settings: {
+                  language: null,
+                  theme: null,
+                  font: null,
+                  },
+        progress: {
+                  currentChapter: null,
+                  turn: 0,
+                  history: [],
+                  variables: {},
+                  items: {},
+                  combat: null,
+                  },
+        stats: {
+                  chaptersVisited: 0,
+                  combatsWon: 0,
+                  deaths: 0
+                },
+        metadata: {
+                  started: false,
+                  startedAt: null,
+                  lastPlayedAt: null, 
+                  version: null,
+                  seed : null,
+                  checksum: null
+                  },
       };
     }
 
     return state.bookState[bookId];
   },
 
+  persistGameData(bookId, data) {
+    if (!bookId) {
+      throw new Error("persistGameData: bookId inválido");
+    }
+
+    state.ensureBookState(bookId);
+
+    const bookState = state.bookState[bookId];
+
+    // Atualiza capítulo atual
+    if (data.progress?.currentChapter !== undefined) {
+      bookState.progress.currentChapter = data.progress.currentChapter;
+    }
+
+    // Atualiza variáveis
+    if (data.variables) {
+      bookState.variables = {
+        ...bookState.variables,
+        ...data.variables
+      };
+    }
+
+    // Atualiza itens
+    if (data.items) {
+      bookState.items = {
+        ...bookState.items,
+        ...data.items
+      };
+    }
+
+    // Atualiza histórico
+    if (data.addHistory) {
+      bookState.history.push(data.addHistory);
+    }
+
+    bookState.metadata.lastPlayedAt = Date.now();
+    //bookState.metadata.version = manifest.version;
+
+    state.save();
+  },
+
   hasProgress(bookId) {
     const progress = this.bookState?.[bookId];
-    return progress && progress.currentChapter;
+    return !!progress?.metadata?.started;
   }
 };
 

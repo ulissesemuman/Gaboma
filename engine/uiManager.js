@@ -1,10 +1,11 @@
 import state from "./state.js";
 import { BookManager } from "./bookManager.js";
-import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t } from "./i18n.js";
+import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t, tb } from "./i18n.js";
 import { Reader } from "./reader.js";
 import { ThemeManager } from "./themeManager.js";
 import { FontManager } from "./fontManager.js";
 import { DialogManager } from "./dialogManager.js";
+import { Engine } from "./engine.js";
 
 // ---------- UI ----------
 
@@ -122,8 +123,8 @@ function bindUILanguageSelector(selectEl) {
   };
 }
 
-async function setUILanguage(lang) {
-  await loadUILanguage(lang);
+async function setUILanguage(language) {
+  await loadUILanguage(language);
 
   renderCurrentView();
 
@@ -183,7 +184,7 @@ function renderLibrary(books, localized) {
 async function openBookHome() {
 
   const bookId = state.currentBookId;
-  let book = BookManager.getCurrentBook();  
+  const book = BookManager.getCurrentBook();  
 
   if (bookId !== state.currentBookId || !book) {
     await BookManager.loadBook(bookId);
@@ -192,6 +193,8 @@ async function openBookHome() {
       await BookManager.setBookState(bookId);
     }
   }
+
+  await loadBookLanguage(bookId, state.bookState[bookId].settings.language);
 
   const localized = await BookManager.loadBookLocalizedData(bookId);
   const bookHomeConfig = await BookManager.getBookHomeConfig(bookId);  
@@ -206,7 +209,7 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
     throw new Error("renderBookHome: " + t("error.elementNotFound", { element: "#book-home" }));
   }
 
-  applyBookVisualIdentity(bookId);  
+  applyBookVisualIdentity(bookId);
 
   const coverConfig = bookHomeConfig.cover;
   let coverImg = coverConfig.front;
@@ -301,8 +304,6 @@ async function bindBookLanguageSelector(selectEl) {
   const index = await BookManager.loadBookLanguageList(bookId);
   const languages = index.languages;
 
-  const bookState = state.bookState[bookId];
-
   selectEl.innerHTML = "";
 
   languages.forEach(lang => {
@@ -315,22 +316,41 @@ async function bindBookLanguageSelector(selectEl) {
   selectEl.value = await BookManager.resolveBookLanguage(state.currentBookId);
 
   selectEl.onchange = async (e) => {
-    bookState.language = e.target.value;
-    state.save();
-
-    renderCurrentView();
+    await setBookLanguage(bookId, e.target.value);
   };
+}
+
+async function setBookLanguage(bookId, language) {
+  await loadBookLanguage(bookId, language);
+
+  renderCurrentView();
+
+  if (isConfigPopupOpen()) {
+    renderConfigPopup();
+  }
 }
 
 // ---------- Reader ----------
 
-async function openReader() {
+ function openReader() {
   const book = BookManager.getCurrentBook();
-  const story = book.story;
 
-  Reader.loadStory(story);
+  if (!book?.story) {
+    console.error("Livro sem story carregada.");
+    return;
+  }
 
-  const chapter = Reader.startStory();
+  Reader.loadStory(book.story);
+
+  let chapter = null
+
+  const bookId = state.currentBookId;
+  
+  if (state.hasProgress(bookId)) {
+    chapter = Reader.goToChapter(state.bookState[bookId].progress.currentChapter);
+  } else {
+    chapter = Reader.startStory();
+  }
 
   renderReader(chapter);
 }
@@ -342,19 +362,21 @@ export function renderReader(chapter) {
     throw new Error("renderReader: " + t("error.elementNotFound", { element: "#reader" }));
   }
 
-  applyBookVisualIdentity(state.currentBookId);  
+  const bookId = state.currentBookId;
+
+  applyBookVisualIdentity(bookId);
 
   // Texto
   chapter.text.forEach(paragraph => {
     const p = document.createElement("p");
-    p.textContent = paragraph;
+    p.textContent = tb(paragraph);
     readerEl.appendChild(p);
   });
 
   // Se não houver escolhas → fim
   if (!chapter.choices || chapter.choices.length === 0) {
     const endBtn = document.createElement("button");
-    endBtn.textContent = "Recomeçar";
+    endBtn.textContent = tb("book.restart");
     endBtn.onclick = () => {
       const newChapter = Reader.startStory();
       renderReader(newChapter);
@@ -364,13 +386,17 @@ export function renderReader(chapter) {
     return;
   }
 
+  const resolved = Engine.resolveChapter(chapter);
+  const choices = resolved.choices;
+
   // Choices
-  chapter.choices.forEach(choice => {
+  choices.forEach(choice => {
     const btn = document.createElement("button");
-    btn.textContent = choice.text;
+    btn.textContent = tb(choice.text);
 
     btn.onclick = () => {
       const nextChapter = Reader.goToChapter(choice.next);
+      //const nextChapter = Engine.choose(choice.next);
       renderReader(nextChapter);
     };
 
@@ -723,7 +749,6 @@ async function exportState() {
     icon: "success",
     iconColor: "#4caf50"
   });  
-
 }
 
 async function importState(file) {

@@ -1,16 +1,16 @@
 {
   "manifestVersion": "1.0.0",
-  "id": "eldenmoor",
-  "title": "The Oath of Eldenmoor",
+  "id": "dark-forest-2",
+  "title": "Floresta Negra",
   "author": "Ulisses Farias",
   "version": "1.0.0",
   "languages": ["pt-br", "en-us"],
   "defaultLanguage": "pt-br",
   "start": "intro",
   "cover": "assets/cover.png",
-  "summary": "Uma fantasia sombria sobre juramentos, corrupção e destino.",
-  "defaultTheme": "parchment",
-  "defaultFont": "crimson",
+  "summary": "A missão é chegar ao castelo e entregar a carta, mas passar por essa floresta não será fácil.",
+  "defaultTheme": "dark-green",
+  "defaultFont": "merriweather",
   "dice": {
     "count": 2,
     "sides": 6
@@ -23,5 +23,10 @@
       "back": "back-cover.png",
       "allowFlip": true
     }
-  }  
+  },
+    "settings": {
+      "highlightItems": true,
+      "highlightVariables": false,
+      "highlightLore": true
+  }
 }

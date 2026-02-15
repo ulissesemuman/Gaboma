@@ -1,3 +1,36 @@
+import { Reader } from "./reader";
+
+export function choose(choiceId) {
+/*  const book = BookManager.getCurrentBook();
+
+  if (!book?.story) {
+    console.error("Livro sem story carregada.");
+    return;
+  }
+
+  const choice = book.story.chapters[state.bookState[state.currentBookId].progress.currentChapter].choices[choiceId];
+
+  if (!choice) {
+    throw new Error(t("error.invalidChoice", { choiceId }));
+  }
+
+  evaluateEffects(1, 6);
+
+  const isValid = false;
+
+  const visibleChoices = choice.choices.filter(choice =>
+    isValid = evaluateConditions(choice.conditions, state)
+  );
+
+  const nextChapter = null;
+
+  if (isValid) {*/
+    const nextChapter = Reader.goToChapter(choiceId);
+  //}
+
+  return nextChapter;
+}
+
 export function resolveChapter(chapterId, story, state) {
   const chapter = story.chapters[chapterId];
 
@@ -68,7 +101,7 @@ export async function restartBook(bookId) {
 
   state.ensureBookState(bookId);
 
-  state.bookState[bookId].currentChapter = manifest.start;
+  state.bookState[bookId].progress.currentChapter = manifest.start;
   state.bookState[bookId].inventory = structuredClone(gameData.initialInventory || {});
   state.bookState[bookId].variables = structuredClone(gameData.initialVariables || {});
   state.bookState[bookId].flags = {};
@@ -110,4 +143,8 @@ export function evaluateEffects({ count, sides }) {
     }
   }
 }
+
+export const Engine = {
+  choose
+};
 
