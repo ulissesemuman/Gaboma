@@ -80,10 +80,15 @@
         {
           "text": "chapter.mysterious_portal.choice.strike_with_axe",
           "effects": { "increment": { "doorHits": 1 } },
-          "conditions": {
-            "variables": { "doorHits": 3 }
+          "success": {
+            "conditions": {
+              "variables": { "doorHits": 3 }
+            },
+            "next": "porta_aberta"
           },
-          "repeatable": true,
+          "failure": {
+            "message": "Ainda não abriu."
+          },
           "next": "ruins"
         }
       ]
@@ -93,6 +98,22 @@
       "text": [
         "chapter.treasure.text.line_1",
         "chapter.treasure.text.line_2"
+      ],
+      "choices": [
+        {
+          "text": "chapter.mysterious_portal.choice.strike_with_axe",
+          "effects": { "increment": { "chestHits": 1 } },
+          "success": {
+            "conditions": {
+              "variables": { "chestHits": 3 }
+            },
+            "next": "porta_aberta"
+          },
+          "failure": {
+            "message": "Ainda não abriu."
+          },
+          "next": "mysterious_portal"
+        }
       ]
     },
 

@@ -138,7 +138,22 @@ async function loadBookStory(bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-  return Utils.fetchJSON(`books/${bookId}/story/story.json`);
+  const basePath = `books/${bookId}/story`;
+
+  const story = await Utils.fetchJSON(`${basePath}/story.json`);
+
+  const variables = await Utils.fetchJSONOptional(`${basePath}/variables.json`);
+  const items = await Utils.fetchJSONOptional(`${basePath}/items.json`);
+  const enemies = await Utils.fetchJSONOptional(`${basePath}/enemies.json`);
+  const highlights = await Utils.fetchJSONOptional(`${basePath}/highlights.json`);  
+
+  return {
+    ...story,
+    variables: variables ?? {},
+    items: items ?? {},
+    enemies: enemies ?? {},
+    highlights: highlights ?? {}
+  };
 }
 
 export function getCurrentBook() {
@@ -146,12 +161,12 @@ export function getCurrentBook() {
 }
 
 export function setCurrentBook(bookData) {
-  if (!bookData || !bookData.id) {
+  if (!bookData || !bookData.manifest || !bookData.manifest.id) {
     throw new Error(t("error.invalidBook"));
   }
 
   currentBook = bookData;
-  state.currentBookId = bookData.id;
+  state.currentBookId = bookData.manifest.id;
   state.save();
 }
 
@@ -170,12 +185,15 @@ export async function setBookState(bookId) {
   const font = FontManager.resolveFont(bookId);
   const theme = ThemeManager.resolveTheme(bookId);
  
-  state.ensureBookState(bookId);
-
   const initialVariables = {};
   if (story.variables) {
     Object.entries(story.variables).forEach(
       ([id, config]) => {
+        if (config.type === "boolean") {
+          initialVariables[id] = config.initial ?? false;
+          return;
+        }
+
         initialVariables[id] = config.initial ?? 0;
       }
     );
@@ -188,7 +206,7 @@ export async function setBookState(bookId) {
         initialItems[id] = config.initial ?? 0;
       }
     );
-  }  
+  }
 
   state.persistGameData(bookId, {
     progress: {
@@ -215,7 +233,7 @@ export async function loadBook(bookId) {
   const story = await loadBookStory(bookId);
 
   const book = {
-    ...manifest,
+    manifest,
     story
   };
 

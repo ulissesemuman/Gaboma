@@ -1,43 +1,47 @@
 {
-  "variables": {
-    "strength": {
-      "type": "number",
-      "description": "var.strength.desc",
-      "initial": 5,
-      "min": 0,
-      "max": 20,
-      "showInSheet": true,
-      "label": "var.strength"
-    },
+  "strength": {
+    "type": "number",
+    "description": "var.strength.desc",
+    "initial": 5,
+    "min": 0,
+    "max": 20,
+    "showInSheet": true,
+    "label": "var.strength"
+  },
 
-    "life": {
-      "type": "number",
-      "description": "var.life.desc",
-      "initial": 10,
-      "min": 0,
-      "showInSheet": true,
-      "label": "var.life",
-      "fatalAtZero": true
-    },
+  "life": {
+    "type": "number",
+    "description": "var.life.desc",
+    "initial": 10,
+    "min": 0,
+    "showInSheet": true,
+    "label": "var.life",
+    "fatalAtZero": true
+  },
 
-    "maxLife": {
-      "type": "derived",
-      "description": "var.maxLife.desc",
-      "formula": "10 + strength * 2",
-      "showInSheet": true,
-      "label": "var.maxLife"
-    },
+  "maxLife": {
+    "type": "derived",
+    "description": "var.maxLife.desc",
+    "formula": "10 + strength * 2",
+    "showInSheet": true,
+    "label": "var.maxLife"
+  },
 
-    "secretFlag": {
-      "type": "boolean",
-      "initial": false,
-      "showInSheet": false
-    },
+  "secretFlag": {
+    "type": "boolean",
+    "initial": false,
+    "showInSheet": false
+  },
 
-    "doorHits": {
-      "type": "number",
-      "initial": 0,
-      "showInSheet": false
-    }
+  "doorHits": {
+    "type": "number",
+    "initial": 0,
+    "showInSheet": false
+  },
+
+  "chestHits": {
+    "type": "number",
+    "initial": 0,
+    "showInSheet": false
   }
 }

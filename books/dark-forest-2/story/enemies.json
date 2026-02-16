@@ -30,13 +30,17 @@
 
   "enemyInstances": {
     "ice_mage_01": {
-      "type": "ice_mage"
+      "type": "ice_mage",
+      "persistent": false
     },
     "ice_mage_02": {
-      "type": "ice_mage"
+      "type": "ice_mage",
+      "loot": "potion",
+      "persistent": false
     },
     "orc_guard": {
-      "type": "orc"
+      "type": "orc",
+      "persistent": false
     }
   }
 }

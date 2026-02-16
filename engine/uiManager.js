@@ -170,8 +170,8 @@ function renderLibrary(books, localized) {
       <button>${t("library.read")}</button>
     `;
 
-    card.querySelector("button").onclick = () => {
-      state.currentBookId = book.id;
+    card.querySelector("button").onclick = async () => {
+      await BookManager.loadBook(book.id);
       openBookHome();
     };
 
@@ -184,14 +184,9 @@ function renderLibrary(books, localized) {
 async function openBookHome() {
 
   const bookId = state.currentBookId;
-  const book = BookManager.getCurrentBook();  
 
-  if (bookId !== state.currentBookId || !book) {
-    await BookManager.loadBook(bookId);
-
-    if (!state.bookState?.[bookId]) {
-      await BookManager.setBookState(bookId);
-    }
+  if (!state.bookState?.[bookId]) {
+    await BookManager.setBookState(bookId);
   }
 
   await loadBookLanguage(bookId, state.bookState[bookId].settings.language);
@@ -272,8 +267,20 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
     document.getElementById("toggle-cover").style.display = "none";
   }
 
-  if (state.hasProgress(bookId)) {
+  const bookState = state.bookState[bookId];
+
+  if (bookState.metadata.started) {
     document.getElementById("book-action").textContent = t("book.continue");
+  }
+  else {
+    if (Engine.hasRealProgress(bookId)) {
+      document.getElementById("book-action").textContent = t("book.continue");
+      bookState.metadata.started = true;
+      state.save();
+    }
+    else {
+      document.getElementById("book-action").textContent = t("book.start");
+    }
   }
 
   document.getElementById("book-action").onclick = () => {
@@ -395,8 +402,8 @@ export function renderReader(chapter) {
     btn.textContent = tb(choice.text);
 
     btn.onclick = () => {
-      const nextChapter = Reader.goToChapter(choice.next);
-      //const nextChapter = Engine.choose(choice.next);
+      const chapterId = Engine.resolveChoice(choice);
+      const nextChapter = Reader.goToChapter(chapterId);
       renderReader(nextChapter);
     };
 

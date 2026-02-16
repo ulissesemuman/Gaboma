@@ -7,27 +7,23 @@ export function loadStory(story) {
 }
 
 export function startStory() {
-  goToChapter(currentStory.start);
-  return getCurrentChapter();
+  return goToChapter(currentStory.start);
 }
 
 export function goToChapter(chapterId) {
 
-  const bookState = state.bookState[state.currentBookId];
+  const bookId = state.currentBookId;
+  const bookState = state.bookState[bookId];
 
-  if (chapterId !== bookState.progress.currentChapter) {
-    bookState.metadata.started = true;
+  const previousChapter = bookState.progress.currentChapter;
 
-
-    bookState.progress.history = [];
-    bookState.progress.variables = {};
-    bookState.progress.items = {};
-    bookState.progress.combat = null;
-  }  
-
-  bookState.progress.currentChapter = chapterId;
-  bookState.progress.turn ++;  
-  state.save();
+  state.persistGameData(bookId, {
+    progress: {
+      currentChapter: chapterId,
+      turn: state.bookState[bookId].progress.turn + 1,
+      history: [...(bookState.progress.history ?? []), previousChapter]
+    }
+  });
 
   return getCurrentChapter();
 }

@@ -65,7 +65,7 @@ export function resolveTheme(bookId) {
     }
 
     theme =
-        book.defaultTheme ||
+        book.manifest.defaultTheme ||
         state.uiTheme ||
         state.defaultUITheme;
   }

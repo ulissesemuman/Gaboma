@@ -1,3 +1,5 @@
+import { Utils } from "./utils.js";
+
 const STORAGE_KEY = "gaboma_state";
 
 const state = {
@@ -95,32 +97,10 @@ const state = {
       throw new Error("persistGameData: bookId inválido");
     }
 
-    state.ensureBookState(bookId);
+    const bookState = state.ensureBookState(bookId);
 
-    const bookState = state.bookState[bookId];
+    Utils.deepMergeDefined(bookState, data);
 
-    // Atualiza capítulo atual
-    if (data.progress?.currentChapter !== undefined) {
-      bookState.progress.currentChapter = data.progress.currentChapter;
-    }
-
-    // Atualiza variáveis
-    if (data.variables) {
-      bookState.variables = {
-        ...bookState.variables,
-        ...data.variables
-      };
-    }
-
-    // Atualiza itens
-    if (data.items) {
-      bookState.items = {
-        ...bookState.items,
-        ...data.items
-      };
-    }
-
-    // Atualiza histórico
     if (data.addHistory) {
       bookState.history.push(data.addHistory);
     }

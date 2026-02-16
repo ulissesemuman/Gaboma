@@ -53,7 +53,7 @@ export function resolveFont(bookId = null) {
     }
 
     font =
-        book.defaultFont ||
+        book.manifest.defaultFont ||
         state.uiFont ||
         state.defaultUIFont;
   }

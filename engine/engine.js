@@ -1,45 +1,5 @@
-import { Reader } from "./reader.js";
+import { BookManager } from "./bookManager.js";
 import state from "./state.js";
-
-export function choose(choiceId) {
-/*  const book = BookManager.getCurrentBook();
-
-  if (!book?.story) {
-    console.error("Livro sem story carregada.");
-    return;
-  }
-
-  const choice = book.story.chapters[state.bookState[state.currentBookId].progress.currentChapter].choices[choiceId];
-
-  if (!choice) {
-    throw new Error(t("error.invalidChoice", { choiceId }));
-  }
-
-  evaluateEffects(1, 6);*/
-
-  const isValid = false;
-
-  const book = BookManager.getCurrentBook();
-  const bookid = state.currentBookId;
-  const bookState = state.bookState[bookid];
-  const story = book.story;
-  const currentChapter = bookState.progress.currentChapter;
-  const chapter = story.chapters[currentChapter];
-  const choice = chapter.choices[choiceId];
-
-
-  const visibleChoices = choice.choices.filter(choice =>
-    isValid = evaluateConditions(choice.conditions)
-  );
-
-  const nextChapter = null;
-
-  if (isValid) {
-    nextChapter = Reader.goToChapter(choiceId);
-  }
-
-  return nextChapter;
-}
 
 export function resolveChapter(chapter) {
 
@@ -62,14 +22,6 @@ export function resolveChapter(chapter) {
         return choice;
       }
 
-      // Caso repeatable
-      if (choice.repeatable) {
-        return {
-          ...choice,
-          next: state.bookState[state.currentBookId].progress.currentChapter
-        };
-      }
-
       return null;
 
     })
@@ -79,6 +31,39 @@ export function resolveChapter(chapter) {
     ...chapter,
     choices: visibleChoices
   };
+}
+
+export function resolveChoice(choice) {
+  const bookId = state.currentBookId;
+  const currentChapter =
+    state.bookState[bookId].progress.currentChapter;
+
+  // Se não for attempt → fluxo simples
+  if (!choice.attempt) {
+    return choice.next;
+  }
+
+  const { effects, success, failure } = choice.attempt;
+
+  // Aplica efeitos
+  if (effects) {
+    applyEffects(effects);
+  }
+
+  // Avalia sucesso
+  const successConditions = success?.conditions ?? [];
+  const isSuccess = evaluateConditions(successConditions);
+
+  if (isSuccess) {
+    return success.next;
+  }
+
+  // Falha
+  if (failure?.message) {
+    showChapterFeedback(failure.message);
+  }
+
+  return currentChapter;
 }
 
 export function evaluateEffects(effects, { count, sides }) {
@@ -149,6 +134,94 @@ export function evaluateConditions(conditions) {
   }
 }
 
+function resolveDerivedVariables(bookId) {
+  const vars = state.bookState[bookId].variables;
+  const definitions = story.variables;
+
+  Object.entries(definitions).forEach(([id, config]) => {
+    if (config.type === "derived") {
+      vars[id] = evaluateFormula(config.formula, vars);
+    }
+  });
+}
+
+export function startCombat(bookId, enemyInstanceId) {
+  const story = getCurrentBook().story;
+  const instance = story.enemyInstances[enemyInstanceId];
+
+  if (!instance) {
+    throw new Error("Enemy instance not found");
+  }
+
+  const baseEnemy = story.enemies[instance.type];
+
+  state.bookState[bookId].combat = {
+    activeEnemyId: enemyInstanceId,
+    baseType: instance.type,
+    hp: baseEnemy.hp,
+    round: 1
+  };
+
+  state.save();
+}
+
+export function shouldStartCombat(bookId, enemyInstanceId) {
+  const story = getCurrentBook().story;
+  const instance = story.enemyInstances[enemyInstanceId];
+
+  if (!instance.persistent) {
+    return true;
+  }
+
+  return !state.bookState[bookId].enemies.defeated[enemyInstanceId];
+}
+
+export function hasRealProgress(bookId) {
+  if (!bookId) return false;
+
+  const bookState = state.bookState?.[bookId];
+  if (!bookState) return false;
+
+  const book = BookManager.getCurrentBook();
+  const { manifest, story } = book;
+
+  const progress = bookState.progress;
+
+  if (progress.currentChapter !== manifest.start) {
+    return true;
+  }
+
+  if (story.variables) {
+    for (const [id, config] of Object.entries(story.variables)) {
+      const initial = config.initial ?? 0;
+      const current = progress.variables?.[id] ?? initial;
+
+      if (current !== initial) {
+        return true;
+      }
+    }
+  }
+
+  if (story.items) {
+    for (const [id, config] of Object.entries(story.items)) {
+      const initial = config.initial ?? 0;
+      const current = progress.items?.[id] ?? initial;
+
+      if (current !== initial) {
+        return true;
+      }
+    }
+  }
+
+  if (progress.combat?.enemyId) {
+    return true;
+  }
+
+  return false;
+}
+
 export const Engine = {
-  resolveChapter
+  resolveChapter,
+  resolveChoice,
+  hasRealProgress
 };
