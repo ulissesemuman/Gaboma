@@ -31,7 +31,7 @@ Se quiser testar ou modificar o projeto no seu computador:
 
 3. Edite os arquivos em books/ para criar novas histórias interativas.
 
-✨ Futuras melhorias- Melhor organização dos módulos do motor.
+## ✨ Futuras melhorias- Melhor organização dos módulos do motor.
 - Suporte a inventário e estatísticas do jogador.
 - Interface mais amigável para criação de livros-jogo.
 - Documentação detalhada para autores.
