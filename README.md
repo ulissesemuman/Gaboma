@@ -26,3 +26,14 @@ Se quiser testar ou modificar o projeto no seu computador:
 1. Clone o repositório:
    ```bash
    git clone https://github.com/ulissesemuman/Gaboma.git
+
+2.  Abra o arquivo index.html em qualquer navegador moderno.
+
+3. Edite os arquivos em books/ para criar novas histórias interativas.
+
+✨ Futuras melhorias- Melhor organização dos módulos do motor.
+- Suporte a inventário e estatísticas do jogador.
+- Interface mais amigável para criação de livros-jogo.
+- Documentação detalhada para autores.
+  
+💡 Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
