@@ -37,5 +37,6 @@
   "error.viewNotFound": "View '{view}' não encontrada no DOM.",
   "error.elementNotFound": "Elemento {element} não encontrado.",
   "error.invalidBook": "O livro atual é nulo ou indefinido.",
-  "error.noAvailableUILanguages": "Nenhum idioma de interface disponível."
+  "error.noAvailableUILanguages": "Nenhum idioma de interface disponível.",
+  "game.varDelta": "{var} {sign}{value}"
 }

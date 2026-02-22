@@ -45,7 +45,7 @@ python -m http.server 8000
 - **Integration points to check when making changes**:
   - Calls to `state.*` methods in UI code (`state.save()`, `state.hasProgress()`, `state.startNewBook()`) — locate and verify their implementations before refactoring state shape.
   - `loadBookLocalizedData(bookId, lang)` is async and used inside list rendering; avoid blocking UI by batching or preloading when adding large books.
-  - Reader rendering is split between `reader.js` and `uiManager.js` — search for cross-file references (`renderCurrentChapter`, `openReader`, `openBookHome`) when modifying reader flow.
+  - Reader rendering is split between `reader.js` and `uiManager.js` — search for cross-file references (`rendercurrentChapterId`, `openReader`, `openBookHome`) when modifying reader flow.
 
 - **What not to change without checking**:
   - DOM IDs in `index.html` — many modules target them directly.

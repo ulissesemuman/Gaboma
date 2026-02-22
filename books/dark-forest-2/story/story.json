@@ -1,5 +1,5 @@
 {
-  "start": "intro",
+  "startChapterId": "intro",
 
   "chapters": {
     "intro": {
@@ -10,7 +10,12 @@
       "choices": [
         { "text": "chapter.intro.choice.forest", "next": "forest" },
         { "text": "chapter.intro.choice.village", "next": "village" }
-      ]
+      ],
+      "onEnter": {
+        "effects": [
+          { "type": "addVar", "id": "life", "value": 4 }
+        ]
+      }
     },
 
     "forest": {
@@ -59,7 +64,7 @@
         "chapter.deepForest.text.line_1"
       ],
       "choices": [
-        { "text": "chapter.deepForest.choice.ruins", "next": "mysterious_portal" }
+        { "text": "chapter.deepForest.choice.mysterious_portal", "next": "mysterious_portal" }
       ]
     },
 
@@ -68,7 +73,10 @@
         "chapter.map.text.line_1"
       ],
       "choices": [
-        { "text": "chapter.map.choice.treasure", "next": "treasure" }
+        { 
+          "text": "chapter.map.choice.treasure", "next": "treasure",
+          "attempt": { "increment": { "treasureFound": 1 } } 
+        }
       ]
     },
 
@@ -79,15 +87,19 @@
       "choices": [
         {
           "text": "chapter.mysterious_portal.choice.strike_with_axe",
-          "effects": { "increment": { "doorHits": 1 } },
-          "success": {
-            "conditions": {
-              "variables": { "doorHits": 3 }
+          "attempt": {
+            "effects": { 
+              "increment": { "doorHits": 1 } 
             },
-            "next": "porta_aberta"
-          },
-          "failure": {
-            "message": "Ainda não abriu."
+            "success": {
+              "conditions": {
+                "variables": { "doorHits": 3 }
+              },
+              "next": "porta_aberta"
+            },
+            "failure": {
+              "message": "Ainda não abriu."
+            }
           },
           "next": "ruins"
         }
@@ -102,15 +114,19 @@
       "choices": [
         {
           "text": "chapter.mysterious_portal.choice.strike_with_axe",
-          "effects": { "increment": { "chestHits": 1 } },
-          "success": {
-            "conditions": {
-              "variables": { "chestHits": 3 }
+          "attempt": {
+            "effects": { 
+              "increment": { "chestHits": 1 } 
             },
-            "next": "porta_aberta"
-          },
-          "failure": {
-            "message": "Ainda não abriu."
+            "success": {
+              "conditions": {
+                "variables": { "chestHits": 3 }
+              },
+              "next": "porta_aberta"
+            },
+            "failure": {
+              "message": "Ainda não abriu."
+            }
           },
           "next": "mysterious_portal"
         }
@@ -120,7 +136,20 @@
     "ruins": {
       "text": [
         "chapter.ruins.text.line_1"
-      ]
+      ],
+      "onEnter": {
+        "effects": [
+          { "type": "addVar", "id": "hp", "value": -1 }
+        ]
+      },
+      "conditions": {
+        "all": [
+          { "hasItem": "key" },
+          { "variableAtLeast": { "name": "strength", "value": 5 } },
+          { "type": "chapterVisited", "chapter": "caverna", "min": 3 },
+          { "type": "firstVisit", "chapter": "torre" }
+        ]
+      }
     }
   }
 }

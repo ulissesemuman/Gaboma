@@ -1,5 +1,5 @@
 {
-  "start": "intro",
+  "startChapterId": "intro",
 
   "chapters": {
     "intro": {

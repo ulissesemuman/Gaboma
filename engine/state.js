@@ -3,7 +3,6 @@ import { Utils } from "./utils.js";
 const STORAGE_KEY = "gaboma_state";
 
 const state = {
-  // ----- Interface -----
   uiLanguage: null,
   availableUILanguages: [],
   currentView: null, // "library", "book-home", "reader"
@@ -11,14 +10,10 @@ const state = {
   uiFont: null,
   defaultUITheme: "gaboma",
   defaultUIFont: "crimson",
-
-  // ----- Biblioteca -----
+ 
   currentBookId: null,
+  lastBookId: null,
 
-  // ----- Livro atual -----
-  currentBookLanguage: null,
-
-  // ----- Progresso por livro -----
   bookState: {},
 
   save() {
@@ -66,15 +61,17 @@ const state = {
                   font: null,
                   },
         progress: {
-                  currentChapter: null,
+                  currentChapterId: null,
                   turn: 0,
                   history: [],
                   variables: {},
                   items: {},
                   combat: null,
+                  gameover: false,
+                  chaptersVisited: {}
                   },
         stats: {
-                  chaptersVisited: 0,
+                  totalChaptersVisited: 0,
                   combatsWon: 0,
                   deaths: 0
                 },
@@ -99,10 +96,52 @@ const state = {
 
     const bookState = state.ensureBookState(bookId);
 
-    Utils.deepMergeDefined(bookState, data);
+    if (data.progress?.currentChapterId !== undefined) {
+      bookState.progress.currentChapterId = data.progress.currentChapterId;
+    }
 
-    if (data.addHistory) {
-      bookState.history.push(data.addHistory);
+    if (data.progress?.turn !== undefined) {
+      bookState.progress.turn = data.progress.turn;
+    }
+
+    if (data.progress?.combat !== undefined) {
+      Utils.mergeStrict(bookState.progress.combat, data.progress.combat);
+    }
+
+    if (data.progress?.variables) {
+      Utils.mergeDynamic(bookState.progress.variables, data.progress.variables);
+    }
+
+    if (data.progress?.items) {
+      Utils.mergeDynamic(bookState.progress.items, data.progress.items);
+    }
+
+    if (data.progress?.chaptersVisited) {
+      Utils.mergeDynamic(bookState.progress.chaptersVisited, data.progress.chaptersVisited);
+    }
+
+    if (data.settings) {
+      Utils.mergeStrict(bookState.settings, data.settings);
+    }
+
+    if (data.metadata) {
+      Utils.mergeStrict(bookState.metadata, data.metadata);
+    }
+
+    if (data.stats) {
+      Utils.mergeStrict(bookState.stats, data.stats);
+    }    
+
+    if (data.progress?.addHistory) {
+      const entries = Array.isArray(data.progress.addHistory)
+        ? data.progress.addHistory
+        : [data.progress.addHistory];
+
+      entries.forEach(entry => {
+        bookState.progress.history.push({
+          ...entry
+        });
+      });
     }
 
     bookState.metadata.lastPlayedAt = Date.now();

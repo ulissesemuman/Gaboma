@@ -22,30 +22,35 @@ export async function fetchJSONOptional(path) {
   return res.json();
 }
 
-function deepMergeDefined(target, source) {
-  if (!source) return;
-
-  Object.entries(source).forEach(([key, value]) => {
-    if (value === undefined) return;
+function mergeStrict(target, source, path = "") {
+  for (const key of Object.keys(source)) {
+    if (!(key in target)) {
+      throw new Error(
+        `Propriedade inválida em bookState: ${path}${key}`
+      );
+    }
 
     if (
-      typeof value === "object" &&
-      value !== null &&
-      !Array.isArray(value)
+      typeof source[key] === "object" &&
+      source[key] !== null &&
+      !Array.isArray(source[key])
     ) {
-      if (!target[key]) {
-        target[key] = {};
-      }
-
-      deepMergeDefined(target[key], value);
+      mergeStrict(target[key], source[key], `${path}${key}.`);
     } else {
-      target[key] = value;
+      target[key] = source[key];
     }
+  }
+}
+
+function mergeDynamic(target, source) {
+  Object.entries(source).forEach(([key, value]) => {
+    target[key] = value;
   });
 }
 
 export const Utils = {
   fetchJSON,
   fetchJSONOptional,
-  deepMergeDefined
+  mergeStrict,
+  mergeDynamic
 };

@@ -140,6 +140,9 @@ async function openLibrary() {
   if((state.currentView !== "library")) {
     BookManager.resetLibraryCache();
     BookManager.resetBooksLanguageCache();
+
+    state.lastBookId = state.currentBookId;
+    state.currentBookId = null;
   }
 
   const books = await BookManager.loadLibrary();
@@ -251,9 +254,11 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
     document.getElementById("book-summary").style.display = "none";
   }
 
+  let toggleBtn = document.getElementById("toggle-cover");
+
   if (coverConfig.allowFlip)
   {
-    document.getElementById("toggle-cover").onclick = () => {
+    toggleBtn.onclick = () => {
       coverImg = coverImg === 
         coverConfig.front ? coverConfig.back : coverConfig.front;
 
@@ -264,26 +269,19 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
   }   
   else
   {
-    document.getElementById("toggle-cover").style.display = "none";
+    toggleBtn.style.display = "none";
   }
 
-  const bookState = state.bookState[bookId];
+  let actionBtn = document.getElementById("book-action");
 
-  if (bookState.metadata.started) {
-    document.getElementById("book-action").textContent = t("book.continue");
+  if (state.hasProgress(bookId)) {
+    actionBtn.textContent = t("book.continue");
   }
   else {
-    if (Engine.hasRealProgress(bookId)) {
-      document.getElementById("book-action").textContent = t("book.continue");
-      bookState.metadata.started = true;
-      state.save();
-    }
-    else {
-      document.getElementById("book-action").textContent = t("book.start");
-    }
+    actionBtn.textContent = t("book.start");
   }
 
-  document.getElementById("book-action").onclick = () => {
+  actionBtn.onclick = () => {
     openReader();
   };
 }
@@ -349,20 +347,13 @@ async function setBookLanguage(bookId, language) {
 
   Reader.loadStory(book.story);
 
-  let chapter = null
-
   const bookId = state.currentBookId;
-  
-  if (state.hasProgress(bookId)) {
-    chapter = Reader.goToChapter(state.bookState[bookId].progress.currentChapter);
-  } else {
-    chapter = Reader.startStory();
-  }
+  const bookState = state.bookState[bookId];
 
-  renderReader(chapter);
+  renderReader(bookState.progress.currentChapterId);
 }
 
-export function renderReader(chapter) {
+export function renderReader(chapterId) {
   
  const readerEl = prepareView("reader");
   if (!readerEl) {
@@ -373,14 +364,14 @@ export function renderReader(chapter) {
 
   applyBookVisualIdentity(bookId);
 
-  // Texto
+  const chapter = Reader.getcurrentChapter();
+
   chapter.text.forEach(paragraph => {
     const p = document.createElement("p");
     p.textContent = tb(paragraph);
     readerEl.appendChild(p);
   });
 
-  // Se não houver escolhas → fim
   if (!chapter.choices || chapter.choices.length === 0) {
     const endBtn = document.createElement("button");
     endBtn.textContent = tb("book.restart");
@@ -393,7 +384,7 @@ export function renderReader(chapter) {
     return;
   }
 
-  const resolved = Engine.resolveChapter(chapter);
+  const resolved = Reader.goToChapter(chapterId);
   const choices = resolved.choices;
 
   // Choices
@@ -402,9 +393,9 @@ export function renderReader(chapter) {
     btn.textContent = tb(choice.text);
 
     btn.onclick = () => {
-      const chapterId = Engine.resolveChoice(choice);
-      const nextChapter = Reader.goToChapter(chapterId);
-      renderReader(nextChapter);
+      const nextChapter = Engine.handleChoiceClick(choice);
+     
+      renderReader(nextChapter.id);
     };
 
     readerEl.appendChild(btn);
@@ -417,7 +408,7 @@ function renderBottomBar() {
   // Biblioteca
   if (state.currentView === "library") {
     setBottomBar([
-      { id: "config", label: t("ui.settings"), onClick: openConfigPopup }
+      { id: "config", label: t("ui.settings"), onClick: openSettingsPopup }
     ]);
     return;
   }
@@ -426,7 +417,7 @@ function renderBottomBar() {
   if (state.currentView === "book-home") {
     setBottomBar([
       { id: "library", label: t("ui.library"), onClick: openLibrary },
-      { id: "config", label: t("ui.settings"), onClick: openConfigPopup }
+      { id: "config", label: t("ui.settings"), onClick: openSettingsPopup }
     ]);
     return;
   }
@@ -436,7 +427,7 @@ function renderBottomBar() {
     setBottomBar([
       { id: "home", label: t("ui.bookHome"), onClick: openBookHome },
       { id: "library", label: t("ui.library"), onClick: openLibrary },
-      { id: "config", label: t("ui.settings"), onClick: openConfigPopup }
+      { id: "config", label: t("ui.settings"), onClick: openSettingsPopup }
     ]);
     return;
   }
@@ -455,9 +446,9 @@ function setBottomBar(buttons) {
   });
 }
 
-// ---------- Config popup ----------
+// ---------- Settings popup ----------
 
-function openConfigPopup() {
+function openSettingsPopup() {
   const overlay = document.getElementById("config-overlay");
 
   renderConfigPopup();

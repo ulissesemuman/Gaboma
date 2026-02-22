@@ -34,7 +34,7 @@ export function t(key, vars = {}) {
 export async function loadBookLanguage(bookId, language) {
   const data = await Utils.fetchJSON(`books/${bookId}/language/${language}.json`);
   const bookState = state.bookState[bookId];
-  bookState.language = language;
+  bookState.settings.language = language;
   state.save();
   bookLanguageData = data;
   return data;

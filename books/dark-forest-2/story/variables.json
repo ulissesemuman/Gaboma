@@ -22,7 +22,7 @@
   "maxLife": {
     "type": "derived",
     "description": "var.maxLife.desc",
-    "formula": "10 + strength * 2",
+    "formula": "life + strength * 2",
     "showInSheet": true,
     "label": "var.maxLife"
   },

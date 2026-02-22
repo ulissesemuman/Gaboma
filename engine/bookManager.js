@@ -176,11 +176,8 @@ export async function setBookState(bookId) {
   }
 
   const book = await getCurrentBook();
-  const { manifest, story } = book;
+  const story = book.story;
 
-  const defaultStartChapter = manifest.start;
-
-  const currentBookChapter = state.currentBookChapter || defaultStartChapter;
   const language = await resolveBookLanguage(bookId);
   const font = FontManager.resolveFont(bookId);
   const theme = ThemeManager.resolveTheme(bookId);
@@ -210,15 +207,15 @@ export async function setBookState(bookId) {
 
   state.persistGameData(bookId, {
     progress: {
-      currentChapter: currentBookChapter
+      variables: initialVariables,
+      items: initialItems
     },
     settings: {
       language: language,
       font: font,
       theme: theme
     },
-    variables: initialVariables,
-    items: initialItems
+
   });
  }
 

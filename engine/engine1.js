@@ -70,24 +70,12 @@ export async function restartBook(bookId) {
 
   state.ensureBookState(bookId);
 
-  state.bookState[bookId].progress.currentChapter = manifest.start;
+  state.bookState[bookId].progress.currentChapterId = manifest.start;
   state.bookState[bookId].inventory = structuredClone(gameData.initialInventory || {});
   state.bookState[bookId].variables = structuredClone(gameData.initialVariables || {});
   state.bookState[bookId].flags = {};
 
   state.save();
-}
-
-export function checkFatalVariables(bookState, gameData) {
-  const vars = bookState.variables;
-
-  for (const [name, config] of Object.entries(gameData.variables)) {
-    if (config.fatalAtZero && vars[name] <= 0) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 export function rollDice({ count, sides }) {
