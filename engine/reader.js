@@ -1,6 +1,7 @@
-import state from "./state.js";
+import state from "./core/state.js";
 import { BookManager } from "./bookManager.js";
 import { Engine } from "./engine.js";
+import { Effects } from "./flow/effects.js";
 
 let currentStory = null;
 
@@ -20,7 +21,7 @@ export function goToChapter(chapterId) {
   const story = book.story;
 
   const currentChapterId = getcurrentChapterId();
-  const chapter = getcurrentChapter();
+  let chapter = getcurrentChapter();
   let resolved =  {
       ...chapter,
       choices: []
@@ -46,25 +47,27 @@ export function goToChapter(chapterId) {
       }
     });
 
+    chapter = getcurrentChapter();    
+
     if (chapter.onEnter && chapter.onEnter?.effects) {
       const { effects, diceEvents } =
-        Engine.resolveActionEffects(chapter.onEnter);
+        Effects.resolveActionEffects(chapter.onEnter.effects);
 
       const events =
         Engine.resolveActionEvents(diceEvents, effects);
 
       Engine.applyEffects(effects);
 
-      Engine.registerTurn({
+      Engine.registerStateEvent({
         chapterId: chapter.id,
         source: "onEnter",
         events,
         effects
       });
     };
-
-    resolved = Engine.resolveChapter(chapter);
   }
+
+  resolved = Engine.resolveChapter(chapter);
 
   return resolved;
 }

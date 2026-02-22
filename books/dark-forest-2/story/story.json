@@ -52,10 +52,43 @@
 
     "house": {
       "text": [
-        "chapter.house.text.line_1"
+        "chapter.house.text.line_1",
+        "chapter.house.text.line_2",
+        "chapter.house.text.line_3"
       ],
       "choices": [
-        { "text": "chapter.house.choice.map", "next": "map" }
+        { 
+          "text": "chapter.house.choice.village",
+          "next": "village"
+        },
+        { 
+          "text": "chapter.house.choice.map", 
+          "next": "map",
+          "effects": [
+            { "type": "addItem", "id": "map", "value": 1 }
+          ],
+          "conditions": {
+            "hasNotItem": "map"
+          } 
+        },
+        { 
+          "text": "chapter.house.choice.torch", 
+          "next": "torch",
+          "conditions": {
+            "all": [
+              { "hasItem": "map" },
+              { "hasNotItem": "torch" },
+              { "chapterVisited": { "id": "village", "min": 2 }}
+            ]
+          }
+        },
+        { 
+          "text": "chapter.house.choice.map", 
+          "next": "map",
+          "conditions": {
+            "hasItem": "map"
+          } 
+        }
       ]
     },
 
@@ -74,8 +107,7 @@
       ],
       "choices": [
         { 
-          "text": "chapter.map.choice.treasure", "next": "treasure",
-          "attempt": { "increment": { "treasureFound": 1 } } 
+          "text": "chapter.map.choice.treasure", "next": "treasure"
         }
       ]
     },
@@ -83,6 +115,130 @@
     "mysterious_portal": {
       "text": [
         "chapter.mysterious_portal.text.line_1"
+      ],
+      "choices": [
+        {
+          "text": "chapter.mysterious_portal.choice.strike_with_axe",
+
+
+
+          "attempt": {
+            "effects": [
+              {
+                "type": "addVar",
+                "id": "doorHits",
+                "value": {
+                  "add": [
+                    { "var": "doorHits" },
+                    1
+                  ]
+                }
+              }
+            ],
+            "success": {
+              "conditions": {
+                "variables": {
+                  "doorHits": { "gte": 3 }
+                }
+              },
+              "effects": [
+                { "type": "setVar", "id": "doorHits", "value": 0 }
+              ],
+              "next": "ruins",
+              "message": "Você conseguiu destruir a porta!"
+            },
+            "failure": {
+              "effects": [
+                { "type": "addVar", "id": "hp", "value": -1 }
+              ],
+              "message": "Você se machucou tentando."
+            }
+          }
+        }
+      ]
+    },
+
+    "treasure": {
+      "text": [
+        "chapter.treasure.text.line_1"
+      ],
+      "choices": [
+        {
+          "text": "chapter.treasure.choice.use_lockpick",
+          "attempt": {
+            "effects": [
+              {
+                "type": "addVar",
+                "id": "lockPickSucess",
+                "value": {
+                  "add": [
+                    { "var": "lockPicking" },
+                    1,
+                    { "dice": { "count": 2, "sides": 6 } }
+                  ]
+                }
+              }
+            ],
+            "success": {
+              "conditions": {
+                "variables": {
+                  "lockPickSucess": { "gte": 30 }
+                }
+              },
+              "effects": [
+                { "type": "addItem", "id": "gold", "value": 20 },
+                { "type": "setVar", "id": "lockPickSucess", "value": 0 }
+              ],
+              "next": "ruins",
+              "message": "Você conseguiu abrir o baú!"
+            },
+            "failure": {
+              "effects": [
+                { "type": "addVar", "id": "lockPick", "value": -1 }
+              ],
+              "message": "Você quebrou um lockpick, ainda resta(m) {lockPick}."
+            }
+          }
+        },
+        {
+          "text": "chapter.treasure.choice.village",
+          "next": "village"
+        }
+      ]
+    },
+
+    "ruins": {
+      "text": [
+        "chapter.ruins.text.line_1",
+        "chapter.ruins.text.line_2"
+      ],
+      "onEnter": {
+        "effects": [
+          { "type": "addVar", "id": "hp", "value": -1 }
+        ]
+      },
+      "choices": [
+        { 
+          "text": "chapter.ruins.choice.intro", 
+          "next": "intro"
+        },
+        { 
+          "text": "chapter.ruins.choice.ruins_door", 
+          "next": "ruins_door",
+          "conditions": {
+            "all": [
+              { "hasItem": "torch" },
+              { "type": "chapterVisited", "chapter": "village", "min": 2 }
+            ]
+          }
+        }
+      ]
+    },
+
+    "ruins_door": {
+      "text": [
+        "chapter.ruins_door.text.line_1",
+        "chapter.ruins_door.text.line_2"
       ],
       "choices": [
         {
@@ -100,56 +256,9 @@
             "failure": {
               "message": "Ainda não abriu."
             }
-          },
-          "next": "ruins"
+          }
         }
       ]
-    },
-
-    "treasure": {
-      "text": [
-        "chapter.treasure.text.line_1",
-        "chapter.treasure.text.line_2"
-      ],
-      "choices": [
-        {
-          "text": "chapter.mysterious_portal.choice.strike_with_axe",
-          "attempt": {
-            "effects": { 
-              "increment": { "chestHits": 1 } 
-            },
-            "success": {
-              "conditions": {
-                "variables": { "chestHits": 3 }
-              },
-              "next": "porta_aberta"
-            },
-            "failure": {
-              "message": "Ainda não abriu."
-            }
-          },
-          "next": "mysterious_portal"
-        }
-      ]
-    },
-
-    "ruins": {
-      "text": [
-        "chapter.ruins.text.line_1"
-      ],
-      "onEnter": {
-        "effects": [
-          { "type": "addVar", "id": "hp", "value": -1 }
-        ]
-      },
-      "conditions": {
-        "all": [
-          { "hasItem": "key" },
-          { "variableAtLeast": { "name": "strength", "value": 5 } },
-          { "type": "chapterVisited", "chapter": "caverna", "min": 3 },
-          { "type": "firstVisit", "chapter": "torre" }
-        ]
-      }
     }
   }
 }

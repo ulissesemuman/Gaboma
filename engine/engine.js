@@ -1,120 +1,160 @@
 import { BookManager } from "./bookManager.js";
-import state from "./state.js";
+import state from "./core/state.js";
 import { Reader } from "./reader.js";
 import { t, tb } from "./i18n.js";
+import { ExpressionEvaluator } from "./flow/expressionsEvaluator.js";
+import { Effects } from "./flow/effects.js";
 
 export function handleChoiceClick(choice) {
+  const bookId = state.currentBookId;
+  const bookState = state.bookState[bookId];
+  const currentChapterId = bookState.progress.currentChapterId;
 
-  const chapterId = resolveChoice(choice);
+  // 1️⃣ Resolve fluxo da choice
+  const result = resolveChoice(choice);
 
+  // 2️⃣ Resolver effects (AST → delta)
   const { effects, diceEvents } =
-    resolveActionEffects(choice);
+    Effects.resolveActionEffects(result.rawEffects);
 
+  // 3️⃣ Aplicar effects
+  applyEffects(effects);
+
+  // 4️⃣ Construir events visuais
   const events =
     resolveActionEvents(diceEvents, effects);
 
-  applyEffects(effects);
-
-  registerTurn({
-    chapterId,
+  // 5️⃣ Registrar turno
+  registerStateEvent({
+    chapterId: currentChapterId,
     source: "choice",
-    choiceId: choice.id,
+    choiceId: tb(choice.text),
     events,
     effects
   });
 
-  return Reader.goToChapter(chapterId);
+  // 6️⃣ Ir para próximo capítulo
+  return Reader.goToChapter(result.nextChapterId);
 }
 
 function resolveChoice(choice) {
   const bookId = state.currentBookId;
-  const currentChapterId =
-    state.bookState[bookId].progress.currentChapterId;
+  const bookState = state.bookState[bookId];
+  const progress = bookState.progress;
+  const currentChapterId = progress.currentChapterId;
 
-  // Se não for attempt → fluxo simples
+  let rawEffects = [];
+
+  if (choice.effects) {
+    rawEffects.push(...choice.effects);
+  }
+
   if (!choice.attempt) {
-    return choice.next;
+    return {
+      nextChapterId: choice.next,
+      rawEffects
+    };
   }
 
   const { effects, success, failure } = choice.attempt;
 
-  // Aplica efeitos
   if (effects) {
-    applyEffects(effects);
+    rawEffects.push(...effects);
   }
 
-  // Avalia sucesso
-  const successConditions = success?.conditions ?? [];
-  const isSuccess = evaluateConditions(successConditions);
+  const context = {
+    variables: progress.variables,
+    items: progress.items,
+    turn: progress.turn,
+    chaptersVisited: progress.chaptersVisited
+  };
+
+  const normalizedConditions = ExpressionEvaluator.normalizeCondition(success?.conditions);
+
+  const isSuccess = normalizedConditions
+    ? ExpressionEvaluator.evaluateCondition(normalizedConditions, context)
+    : false;
 
   if (isSuccess) {
-    return success.next;
-  }
-
-  // Falha
-  if (failure?.message) {
-    showChapterFeedback(failure.message);
-  }
-
-  return currentChapterId;
-}
-
-function resolveActionEffects(choice) {
-  const effects = [];
-  const diceEvents = [];
-
-  if (!choice.effects) {
-    return { effects, diceEvents };
-  }
-
-  choice.effects.forEach(effect => {
-
-    if (effect.type === "addVar") {
-      const { value, diceEvents: dice } =
-        resolveValueExpression(effect.value, diceEvents);
-
-      const delta = value;
-
-      effects.push({
-        type: "addVar",
-        id: effect.id,
-        delta
-      });
-
-      diceEvents.push(...dice);
+    if (success?.effects) {
+      rawEffects.push(...success.effects);
     }
 
-    if (effect.type === "setVar") {
-      const current =
-        getVariable(effect.id);
+    return {
+      nextChapterId: success?.next,
+      rawEffects
+    };
+  }
 
-      const { value, diceEvents: dice } =
-        resolveValueExpression(effect.value, diceEvents);
+  if (failure?.effects) {
+    rawEffects.push(...failure.effects);
+  }
 
-      const delta = value - current;
-
-      effects.push({
-        type: "addVar",
-        id: effect.id,
-        delta
-      });
-
-      diceEvents.push(...dice);
-    }
-  });
-
-  return { effects, diceEvents };
+  return {
+    nextChapterId: currentChapterId,
+    rawEffects,
+    message: failure?.message ?? null
+  };
 }
 
-function resolveActionEvents(diceEvents, effects) {
+function resolveActionEvents(diceEvents = [], effects = []) {
   const events = [...diceEvents];
 
   effects.forEach(effect => {
-    if (effect.type === "addVar") {
-      events.push({
-        type: "message",
-        text: resolveVarDeltaText(effect)
-      });
+
+    switch (effect.type) {
+
+      case "addVar": {
+        const varConfig =
+          story.variables?.[effect.id];
+
+        // só exibe se permitido
+        if (varConfig?.showInSheet !== false &&
+            effect.delta !== 0) {
+
+          events.push({
+            type: "message",
+            text: resolveVarDeltaText(effect)
+          });
+        }
+        break;
+      }
+
+      case "addItem": {
+        if (effect.delta !== 0) {
+          events.push({
+            type: "message",
+            text: resolveItemDeltaText(effect)
+          });
+        }
+        break;
+      }
+
+      case "rollChance": {
+        events.push({
+          type: "message",
+          text: effect.success
+            ? tb("game.rollChanceSuccess")
+            : tb("game.rollChanceFail")
+        });
+        break;
+      }
+
+      case "startCombat": {
+        events.push({
+          type: "animation",
+          id: "enter_combat"
+        });
+        break;
+      }
+
+      case "endCombat": {
+        events.push({
+          type: "animation",
+          id: "exit_combat"
+        });
+        break;
+      }
     }
   });
 
@@ -178,97 +218,37 @@ function applyEffects(effects = []) {
     switch (effect.type) {
 
       case "addVar": {
-        const variableConfig = story.variables?.[effect.id];
-
-        if (!variableConfig) {
-          throw new Error(`Variable not found: ${effect.id}`);
-        }
-
         const current =
           bookState.progress.variables[effect.id] ?? 0;
 
-        let next = current + effect.delta;
-
-        if (variableConfig.min !== undefined) {
-          next = Math.max(variableConfig.min, next);
-        }
-
-        if (variableConfig.max !== undefined) {
-          next = Math.min(variableConfig.max, next);
-        }
-
-        bookState.progress.variables[effect.id] = next;
-
+        bookState.progress.variables[effect.id] =
+          current + effect.delta;
         break;
       }
 
       case "addItem": {
-        if (!story.items?.[effect.id]) {
-          throw new Error(`Item not found: ${effect.id}`);
-        }
-
         const current =
           bookState.progress.items[effect.id] ?? 0;
 
         bookState.progress.items[effect.id] =
-          current + (effect.delta ?? 1);
-
+          current + effect.delta;
         break;
       }
 
-      case "removeItem": {
-        if (!story.items?.[effect.id]) {
-          throw new Error(`Item not found: ${effect.id}`);
-        }
-
-        const current =
-          bookState.progress.items[effect.id] ?? 0;
-
-        const next =
-          Math.max(0, current - (effect.delta ?? 1));
-
-        bookState.progress.items[effect.id] = next;
-
+      case "startCombat":
+        bookState.progress.combat = effect.data;
         break;
-      }
 
-      case "startCombat": {
-        const enemyInstance =
-          story.enemyInstances?.[effect.enemyId];
-
-        if (!enemyInstance) {
-          throw new Error(`Enemy instance not found: ${effect.enemyId}`);
-        }
-
-        const enemyType =
-          story.enemies?.[enemyInstance.type];
-
-        if (!enemyType) {
-          throw new Error(`Enemy type not found: ${enemyInstance.type}`);
-        }
-
-        bookState.progress.combat = {
-          enemyId: effect.enemyId,
-          enemyHp: enemyType.hp,
-          round: 1
-        };
-
-        break;
-      }
-
-      case "endCombat": {
+      case "endCombat":
         bookState.progress.combat = null;
         break;
-      }
 
-      case "goto": {
-        // NÃO fazer aqui
-        // goToChapter deve ser chamado fora
+      case "rollChance":
+        // não altera estado
         break;
-      }
 
       default:
-        throw new Error(`Unknown effect type: ${effect.type}`);
+        throw new Error(`Unknown effect: ${effect.type}`);
     }
   });
 
@@ -277,7 +257,13 @@ function applyEffects(effects = []) {
   state.save();
 }
 
-function registerTurn({ chapterId, events = [], effects = [], source = "choice", choiceId = null }) {
+function registerStateEvent({
+  chapterId,
+  events = [],
+  effects = [],
+  source = "choice", // choice | onEnter | system | combat | undo | auto
+  choiceId = null
+}) {
   const bookId = state.currentBookId;
 
   if (!bookId) {
@@ -286,13 +272,22 @@ function registerTurn({ chapterId, events = [], effects = [], source = "choice",
 
   const bookState = state.bookState[bookId];
   const progress = bookState.progress;
+  const metadata = bookState.metadata;
 
-  const nextTurn = progress.turn + 1;
+  // 🔹 sequence sempre incrementa
+  const nextSequence = (progress.sequence ?? 0) + 1;
 
-  const turnEntry = {
+  // 🔹 turn só incrementa se for escolha do jogador
+  const nextTurn =
+    source === "choice"
+      ? progress.turn + 1
+      : progress.turn;
+
+  const entry = {
+    sequence: nextSequence,
     turn: nextTurn,
     chapter: chapterId,
-    source, // choice, onEnter, system, combat, undo, auto
+    source,
     choiceId,
     timeStamp: Date.now(),
     events,
@@ -301,21 +296,16 @@ function registerTurn({ chapterId, events = [], effects = [], source = "choice",
 
   state.persistGameData(bookId, {
     progress: {
+      sequence: nextSequence,
       turn: nextTurn,
-      addHistory: turnEntry
+      addHistory: entry
     },
-  metadata: {
-      startedAt: bookState.metadata.startedAt ?? Date.now()
+    metadata: {
+      started: true,
+      startedAt: metadata.startedAt ?? Date.now(),
+      lastPlayedAt: Date.now()
     }
   });
-
-  if (!state.hasProgress(bookId)) {
-    state.persistGameData(bookId, {
-      metadata: {
-        started: true
-      }
-    });
-  }  
 }
 
 export function resolveChapter(chapter) {
@@ -327,12 +317,26 @@ export function resolveChapter(chapter) {
     };
   }
 
+  const bookId = state.currentBookId;
+  const bookState = state.bookState[bookId];
+  const progress = bookState.progress;
+
+  const context = {
+    variables: progress.variables,
+    items: progress.items,
+    turn: progress.turn,
+    chaptersVisited: progress.chaptersVisited
+  };  
+
   const visibleChoices = chapter.choices
     .map(choice => {
 
+      const normalizedConditions = ExpressionEvaluator.normalizeCondition(choice?.conditions);      
+
       const conditionsMet =
         !choice.conditions ||
-        evaluateConditions(choice.conditions);
+        ExpressionEvaluator.evaluateCondition(normalizedConditions, context);
+
 
       // Caso normal
       if (conditionsMet) {
@@ -428,73 +432,6 @@ function checkFatalVariables(bookState, story) {
   }
 }
 
-export function evaluateConditions(conditions) {
-  if (!conditions) return true;
-
-  const inventory = state.bookState[state.currentBookId].progess.items;
-
-  if (conditions.hasItem) {
-    return state.inventory?.[conditions.hasItem] > 0;
-  }
-
-  if (conditions.hasNotItem) {
-    return !state.inventory?.[conditions.hasNotItem];
-  }
-
-  if (conditions.variableEquals) {
-    const { name, value } = conditions.variableEquals;
-    return state.variables?.[name] === value;
-  }
-
-  if (conditions.all) {
-    return conditions.all.every(cond =>
-      evaluateConditions(cond)
-    );
-  }
-
-  if (conditions.any) {
-    return conditions.any.some(cond =>
-      evaluateConditions(cond)
-    );
-  }
-
-/*case "chapterVisited":
-  return (
-    (progress.chaptersVisited[cond.chapter] || 0) >= cond.min
-  );  
-
-if (chaptersVisited["floresta"] > 1) {
-  mostrarTextoAlternativo();
-}
-
-if (chaptersVisited["baú"] === 1) {
-  darItem();
-}*/
-
-
-  if (conditions.dice) {
-    const {
-      count,
-      sides,
-      storeIn,
-      min,
-      max
-    } = conditions.dice;
-
-    const result = rollDice({
-      count: count ?? manifest.dice.count,
-      sides: sides ?? manifest.dice.sides,
-      storeIn,
-      bookState: state.bookState[currentBookId]
-    });
-
-    if (min !== undefined && result < min) return false;
-    if (max !== undefined && result > max) return false;
-
-    return true;
-  }
-}
-
 function resolveDerivedVariables(bookId) {
   const vars = state.bookState[bookId].variables;
   const definitions = story.variables;
@@ -587,17 +524,6 @@ export function hasRealProgress(bookId) {
   return false;
 }
 
-export function rollDice({ count, sides }) {
-  let total = 0;
-
-  for (let i = 0; i < count; i++) {
-    total += Math.floor(Math.random() * sides) + 1;
-  }
-
-  return total;
-}
-
-
 function startNewGame() {
   //Resetar history
   //Resetar combat
@@ -618,8 +544,7 @@ export const Engine = {
   resolveChoice,
   handleChoiceClick,
   hasRealProgress,
-  resolveActionEffects,
   resolveActionEvents,
   applyEffects,
-  registerTurn
+  registerStateEvent,    
 };

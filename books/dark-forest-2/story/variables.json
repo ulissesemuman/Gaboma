@@ -6,6 +6,7 @@
     "min": 0,
     "max": 20,
     "showInSheet": true,
+    "visualFeedback": true,
     "label": "var.strength"
   },
 
@@ -15,6 +16,7 @@
     "initial": 10,
     "min": 0,
     "showInSheet": true,
+    "visualFeedback": true,
     "label": "var.life",
     "fatalAtZero": true
   },
@@ -24,24 +26,49 @@
     "description": "var.maxLife.desc",
     "formula": "life + strength * 2",
     "showInSheet": true,
+    "visualFeedback": true,
     "label": "var.maxLife"
   },
 
   "secretFlag": {
     "type": "boolean",
     "initial": false,
-    "showInSheet": false
+    "showInSheet": false,
+    "visualFeedback": false
   },
 
   "doorHits": {
     "type": "number",
     "initial": 0,
-    "showInSheet": false
+    "showInSheet": false,
+    "visualFeedback": false
   },
 
   "chestHits": {
     "type": "number",
     "initial": 0,
-    "showInSheet": false
+    "showInSheet": false,
+    "visualFeedback": false
+  },
+
+  "lockPicking": {
+    "type": "number",
+    "initial": 3,
+    "showInSheet": false,
+    "visualFeedback": false
+    },
+
+  "lockPickSucess": {
+    "type": "number",
+    "initial": 0,
+    "showInSheet": false,
+    "visualFeedback": false
+  },
+
+  "lockPick": {
+    "type": "number",
+    "initial": 5,
+    "showInSheet": true,
+    "visualFeedback": true
   }
 }

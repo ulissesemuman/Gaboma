@@ -17,8 +17,12 @@
   "chapter.noise.text.line_1": "Era apenas o vento.",
   "chapter.noise.text.line_2": "Você respira aliviado.",
   "chapter.noise.choice.deepForest": "Continuar explorando",
-  "chapter.house.text.line_1": "Dentro da casa há um mapa antigo.",
+  "chapter.house.text.line_1": "Dentro da casa há um mapa antigo em cima de uma mesa.",
+  "chapter.house.text.line_2": "A mesa está iluminada por uma tocha presa na parede.",
+  "chapter.house.text.line_3": "Isso é sinal de que alguém ainda está por perto.",
   "chapter.house.choice.map": "Pegar o mapa e sair",
+  "chapter.house.choice.torch": "Pegar a tocha e sair",
+  "chapter.house.choice.village": "Sair para a vila.",
   "chapter.deepForest.text.line_1": "Você encontra uma ruína antiga com um portal misterioso.",
   "chapter.deepForest.choice.mysterious_portal": "Investigar o portal",
   "chapter.map.text.line_1": "O mapa revela um tesouro escondido.",
@@ -26,6 +30,14 @@
   "chapter.mysterious_portal.text.line_1": "Você descobre um portal misterioso.",
   "chapter.mysterious_portal.choice.strike_with_axe": "Acertar com a machado",
   "chapter.ruins.text.line_1": "Está completamente escuro.",
-  "chapter.treasure.text.line_1": "Você encontra o tesouro.",  
-  "chapter.treasure.text.line_2": "Fim da demonstração."
+  "chapter.ruins.text.line_2": "Você precisa de uma tocha.",
+  "chapter.ruins.choice.intro": "Voltar para o início",
+  "chapter.ruins.choice.ruins_door": "Investigar a porta",  
+  "cahapter.ruins_door.text.line_1": "Ao olhar a porta de perto, você percebe que ela está trancada.",
+  "cahapter.ruins_door.text.line_2": "Não existe chave por perto, mas parece que a porta pode ser quebrada.",
+  "cahapter.ruins_room.text.line_1": "Ao entrar você é surpreendido por um homem fora de si",
+  "chapter.treasure.text.line_1": "Você encontra o tesouro!",
+  "chapter.treasure.choice.use_lockpick": "Usar um lockpick para abrir o baú",
+  "chapter.treasure.choice.village": "Voltar para a vila."
+  
 }

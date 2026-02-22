@@ -1,4 +1,4 @@
-import state from "./state.js";
+import state from "./core/state.js";
 import { BookManager } from "./bookManager.js";
 import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t, tb } from "./i18n.js";
 import { Reader } from "./reader.js";
@@ -189,7 +189,7 @@ async function openBookHome() {
   const bookId = state.currentBookId;
 
   if (!state.bookState?.[bookId]) {
-    await BookManager.setBookState(bookId);
+    await BookManager.initBookState(bookId);
   }
 
   await loadBookLanguage(bookId, state.bookState[bookId].settings.language);
@@ -390,7 +390,7 @@ export function renderReader(chapterId) {
   // Choices
   choices.forEach(choice => {
     const btn = document.createElement("button");
-    btn.textContent = tb(choice.text);
+    btn.textContent = tb(choice.text);""
 
     btn.onclick = () => {
       const nextChapter = Engine.handleChoiceClick(choice);
@@ -862,6 +862,54 @@ function bindProgressButtons() {
     };
     input.click();
   };
+}
+
+// ---------- UI Events ----------
+
+let eventQueue = [];
+
+export function enqueueEvents(events) {
+  eventQueue.push(...events);
+  processNextEvent();
+}
+
+function processNextEvent() {
+  if (!eventQueue.length) return;
+
+  const event = eventQueue.shift();
+
+  switch (event.type) {
+    case "dice":
+      showDiceAnimation(event);
+      break;
+
+    case "message":
+      if (varConfig.visualFeedback && delta !== 0) {
+        showMessage(event.text);
+      }
+      break;
+
+    case "animation":
+      playAnimation(event.id);
+      break;
+
+    case "sound":
+      playSound(event.id);
+      break;      
+  }
+
+  setTimeout(processNextEvent, 500);
+}
+
+function registerVisualEvent(event) {
+  const bookId = state.currentBookId;
+  const progress = state.bookState[bookId].progress;
+
+  const lastTurn = progress.history[progress.history.length - 1];
+  if (!lastTurn) return;
+
+  lastTurn.events = lastTurn.events || [];
+  lastTurn.events.push(event);
 }
 
 // ---------- Init ----------

@@ -1,5 +1,5 @@
 import { BookManager } from "./bookManager.js";
-import state from "./state.js";
+import state from "./core/state.js";
 
 export function getThemesList() {
   const themes = [

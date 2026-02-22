@@ -1,4 +1,4 @@
-import state from "./state.js";
+import state from "./core/state.js";
 import { Utils } from "./utils.js";
 import { t } from "./i18n.js";
 import { ThemeManager } from "./themeManager.js";
@@ -170,10 +170,34 @@ export function setCurrentBook(bookData) {
   state.save();
 }
 
-export async function setBookState(bookId) {
+export async function initBookState(bookId) {
   if (!bookId) {
     throw new Error(t("error.invalidBook"));
   }
+
+/*const initialEnemies = {};
+
+if (story.enemyInstances) {
+  Object.keys(story.enemyInstances).forEach(id => {
+    initialEnemies[id] = {
+      defeated: false
+    };
+  });
+}*/
+
+/*bookState = {
+  ...
+  enemies: {
+    defeated: {},
+  },
+  combat: {
+    activeEnemyId: null,
+    hp: null,
+    round: 0
+  }
+    state.bookState[bookId].enemies.defeated[enemyInstanceId] = true;
+}*/
+
 
   const book = await getCurrentBook();
   const story = book.story;
@@ -270,7 +294,7 @@ export const BookManager = {
   resetBooksLanguageCache,
   loadBookLanguageList,
   loadBookLocalizedData, 
-  setBookState,
+  initBookState,
   getCurrentBook, 
   setCurrentBook, 
   loadBook,

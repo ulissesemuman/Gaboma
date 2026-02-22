@@ -572,3 +572,25 @@ button:hover {
     aspect-ratio: auto;
   }
 }
+
+#chapter-feedback {
+  margin-top: 1rem;
+}
+
+.chapter-feedback-message {
+  padding: 8px 12px;
+  margin-top: 6px;
+  background: rgba(0,0,0,0.1);
+  border-left: 4px solid #999;
+  animation: fadeIn 0.2s ease;
+}
+
+.chapter-feedback-message.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

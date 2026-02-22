@@ -1,4 +1,4 @@
-import { Utils } from "./utils.js";
+import { Utils } from "../utils.js";
 
 const STORAGE_KEY = "gaboma_state";
 
@@ -62,11 +62,17 @@ const state = {
                   },
         progress: {
                   currentChapterId: null,
+                  sequence: 0,
                   turn: 0,
                   history: [],
                   variables: {},
                   items: {},
                   combat: null,
+                  //{
+                  //    activeEnemyId: null,
+                  //    hp: null,
+                  //    round: 0
+                  //}  
                   gameover: false,
                   chaptersVisited: {}
                   },
@@ -146,6 +152,14 @@ const state = {
 
     bookState.metadata.lastPlayedAt = Date.now();
     //bookState.metadata.version = manifest.version;
+
+    state.save();
+  },
+
+  applyDeltas(deltas) {
+    Object.entries(deltas).forEach(([key, value]) => {
+      state.bookState[key].progress[key] = value;
+    });
 
     state.save();
   },

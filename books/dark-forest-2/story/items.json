@@ -33,11 +33,43 @@
     "description": "item.potion.desc",
     "icon": "potion.svg",
     "stackable": true,
-    "weight": 1,
-    "effect": {
-      "onUse": [
-        { "type": "modifyVariable", "target": "life", "value": 5 }
-      ]
-    }
+    "weight": 1
+  },
+
+  "gold": {
+    "label": "item.gold",
+    "category": "currency",
+    "description": "item.gold.desc",
+    "icon": "gold.svg",
+    "stackable": true,
+    "weight": 0.1
+   },
+
+   "lockpick": {
+    "label": "item.lockpick",
+    "category": "tool",
+    "initial": 5,
+    "description": "item.lockpick.desc",
+    "icon": "lockpick.svg",
+    "stackable": true,
+    "weight": 5
+  },
+
+  "map": {
+    "label": "item.map",
+    "category": "decoration",
+    "description": "item.map.desc",
+    "icon": "map.svg",
+    "stackable": false,
+    "weight": 1
+  },
+
+  "torch": {
+    "label": "item.torch",
+    "category": "decoration",
+    "description": "item.torch.desc",
+    "icon": "torch.svg",
+    "stackable": false,
+    "weight": 1
   }
 }

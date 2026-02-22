@@ -1,4 +1,4 @@
-import state from "./state.js";
+import state from "./core/state.js";
 import { BookManager } from "./bookManager.js";
 import { Utils } from "./utils.js";
 
