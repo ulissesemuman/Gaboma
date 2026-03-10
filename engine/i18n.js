@@ -1,5 +1,5 @@
 import state from "./core/state.js";
-import { Utils } from "./utils.js";
+import { FetchUtils } from "./utils/fetchUtils.js";
 
 let uiLanguageData = {};
 let bookLanguageData = {};
@@ -7,7 +7,7 @@ let bookLanguageData = {};
 // ---------- UI Language ----------
 
 export async function loadUILanguage(language) {
-  const data = await Utils.fetchJSON(`language/${language}.json`);
+  const data = await FetchUtils.fetchJSON(`language/${language}.json`);
   state.uiLanguage = language;
   state.save();
   uiLanguageData = data;
@@ -15,7 +15,7 @@ export async function loadUILanguage(language) {
 }
 
 export async function loadAvailableUILanguages() {
-  const index = await Utils.fetchJSON("language/index.json");
+  const index = await FetchUtils.fetchJSON("language/index.json");
   state.availableUILanguages = index.languages;
 }
 
@@ -32,7 +32,7 @@ export function t(key, vars = {}) {
 // ---------- Book Language ----------
 
 export async function loadBookLanguage(bookId, language) {
-  const data = await Utils.fetchJSON(`books/${bookId}/language/${language}.json`);
+  const data = await FetchUtils.fetchJSON(`books/${bookId}/language/${language}.json`);
   const bookState = state.bookState[bookId];
   bookState.settings.language = language;
   state.save();

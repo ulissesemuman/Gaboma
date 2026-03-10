@@ -1,11 +1,11 @@
-import state from "./core/state.js";
-import { BookManager } from "./bookManager.js";
-import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t, tb } from "./i18n.js";
-import { Reader } from "./reader.js";
-import { ThemeManager } from "./themeManager.js";
-import { FontManager } from "./fontManager.js";
+import state from "../core/state.js";
+import { BookLoader } from "../data/bookLoader.js";
+import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t, tb } from "../i18n.js";
+import { Reader } from "../core/reader.js";
+import { ThemeManager } from "../themeManager.js";
+import { FontManager } from "../fontManager.js";
 import { DialogManager } from "./dialogManager.js";
-import { Engine } from "./engine.js";
+import { ActionResolver } from "../flow/actionResolver.js";
 
 // ---------- UI ----------
 
@@ -138,16 +138,16 @@ async function setUILanguage(language) {
 async function openLibrary() {
 
   if((state.currentView !== "library")) {
-    BookManager.resetLibraryCache();
-    BookManager.resetBooksLanguageCache();
+    BookLoader.resetLibraryCache();
+    BookLoader.resetBooksLanguageCache();
 
     state.lastBookId = state.currentBookId;
     state.currentBookId = null;
   }
 
-  const books = await BookManager.loadLibrary();
+  const books = await BookLoader.loadLibrary();
 
-  const localized = await BookManager.loadAllBooksLocalizedData(); 
+  const localized = await BookLoader.loadAllBooksLocalizedData(); 
 
   renderLibrary(books, localized);
 }
@@ -174,7 +174,7 @@ function renderLibrary(books, localized) {
     `;
 
     card.querySelector("button").onclick = async () => {
-      await BookManager.loadBook(book.id);
+      await BookLoader.loadBook(book.id);
       openBookHome();
     };
 
@@ -189,13 +189,13 @@ async function openBookHome() {
   const bookId = state.currentBookId;
 
   if (!state.bookState?.[bookId]) {
-    await BookManager.initBookState(bookId);
+    await BookLoader.initBookState(bookId);
   }
 
   await loadBookLanguage(bookId, state.bookState[bookId].settings.language);
 
-  const localized = await BookManager.loadBookLocalizedData(bookId);
-  const bookHomeConfig = await BookManager.getBookHomeConfig(bookId);  
+  const localized = await BookLoader.loadBookLocalizedData(bookId);
+  const bookHomeConfig = await BookLoader.getBookHomeConfig(bookId);  
 
   renderBookHome(bookId, localized, bookHomeConfig);
 }
@@ -306,7 +306,7 @@ async function bindBookLanguageSelector(selectEl) {
   }
 
   const bookId = state.currentBookId;
-  const index = await BookManager.loadBookLanguageList(bookId);
+  const index = await BookLoader.loadBookLanguageList(bookId);
   const languages = index.languages;
 
   selectEl.innerHTML = "";
@@ -318,7 +318,7 @@ async function bindBookLanguageSelector(selectEl) {
     selectEl.appendChild(option);
   });
 
-  selectEl.value = await BookManager.resolveBookLanguage(state.currentBookId);
+  selectEl.value = await BookLoader.resolveBookLanguage(state.currentBookId);
 
   selectEl.onchange = async (e) => {
     await setBookLanguage(bookId, e.target.value);
@@ -338,14 +338,15 @@ async function setBookLanguage(bookId, language) {
 // ---------- Reader ----------
 
  function openReader() {
-  const book = BookManager.getCurrentBook();
+  const book = BookLoader.getCurrentBook();
+  const story = book.story;
 
-  if (!book?.story) {
+  if (!story) {
     console.error("Livro sem story carregada.");
     return;
   }
 
-  Reader.loadStory(book.story);
+  Reader.loadStory(story);
 
   const bookId = state.currentBookId;
   const bookState = state.bookState[bookId];
@@ -364,7 +365,7 @@ export function renderReader(chapterId) {
 
   applyBookVisualIdentity(bookId);
 
-  const chapter = Reader.getcurrentChapter();
+  const chapter = Reader.getCurrentChapter();
 
   chapter.text.forEach(paragraph => {
     const p = document.createElement("p");
@@ -393,7 +394,7 @@ export function renderReader(chapterId) {
     btn.textContent = tb(choice.text);""
 
     btn.onclick = () => {
-      const nextChapter = Engine.handleChoiceClick(choice);
+      const nextChapter = ActionResolver.handleChoiceClick(choice);
      
       renderReader(nextChapter.id);
     };

@@ -1,9 +1,10 @@
 import state from "./core/state.js";
-import { BookManager } from "./bookManager.js";
-import { Utils } from "./utils.js";
+import { BookLoader } from "./data/bookLoader.js";
+import { FetchUtils } from "./utils/fetchUtils.js";
+//import t from "./i18n.js";
 
 export async function getFontsList() {
-  return Utils.fetchJSON("assets/fonts.json");
+  return FetchUtils.fetchJSON("assets/fonts.json");
 }
 
 async function setFont(fontId, bookId = null) {
@@ -46,7 +47,7 @@ export function resolveFont(bookId = null) {
 
   if (bookId) {
     const bookState = state.bookState?.[bookId]; 
-    const book = BookManager.getCurrentBook();
+    const book = BookLoader.getCurrentBook();
 
     if (bookState && bookState.font) {
       return bookState.font;
@@ -80,10 +81,6 @@ async function loadGoogleFonts() {
   let link = document.getElementById("dynamic-fonts");
 
   link.href = href;
-
-  if (state.uiFont) {
-    //setFont(state.uiFont);
-  }
 }
 
 export const FontManager = {
@@ -92,4 +89,4 @@ export const FontManager = {
   setBookFont: (bookId, fontId) => setFont(fontId, bookId),
   resolveFont,
   loadGoogleFonts,
-};  
+};

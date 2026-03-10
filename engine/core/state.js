@@ -1,4 +1,4 @@
-import { Utils } from "../utils.js";
+import { ObjectUtils } from "../utils/objectUtils.js";
 
 const STORAGE_KEY = "gaboma_state";
 
@@ -67,13 +67,13 @@ const state = {
                   history: [],
                   variables: {},
                   items: {},
-                  combat: null,
+                  combat: {},
                   //{
                   //    activeEnemyId: null,
                   //    hp: null,
                   //    round: 0
                   //}  
-                  gameover: false,
+                  gameOver: false,
                   chaptersVisited: {}
                   },
         stats: {
@@ -106,36 +106,40 @@ const state = {
       bookState.progress.currentChapterId = data.progress.currentChapterId;
     }
 
+    if (data.progress?.sequence !== undefined) {
+      bookState.progress.sequence = data.progress.sequence;
+    }
+
     if (data.progress?.turn !== undefined) {
       bookState.progress.turn = data.progress.turn;
     }
 
     if (data.progress?.combat !== undefined) {
-      Utils.mergeStrict(bookState.progress.combat, data.progress.combat);
+      ObjectUtils.mergeStrict(bookState.progress.combat, data.progress.combat);
     }
 
     if (data.progress?.variables) {
-      Utils.mergeDynamic(bookState.progress.variables, data.progress.variables);
+      ObjectUtils.mergeDynamic(bookState.progress.variables, data.progress.variables);
     }
 
     if (data.progress?.items) {
-      Utils.mergeDynamic(bookState.progress.items, data.progress.items);
+      ObjectUtils.mergeDynamic(bookState.progress.items, data.progress.items);
     }
 
     if (data.progress?.chaptersVisited) {
-      Utils.mergeDynamic(bookState.progress.chaptersVisited, data.progress.chaptersVisited);
+      ObjectUtils.mergeDynamic(bookState.progress.chaptersVisited, data.progress.chaptersVisited);
     }
 
     if (data.settings) {
-      Utils.mergeStrict(bookState.settings, data.settings);
+      ObjectUtils.mergeStrict(bookState.settings, data.settings);
     }
 
     if (data.metadata) {
-      Utils.mergeStrict(bookState.metadata, data.metadata);
+      ObjectUtils.mergeStrict(bookState.metadata, data.metadata);
     }
 
     if (data.stats) {
-      Utils.mergeStrict(bookState.stats, data.stats);
+      ObjectUtils.mergeStrict(bookState.stats, data.stats);
     }    
 
     if (data.progress?.addHistory) {
@@ -168,6 +172,6 @@ const state = {
     const progress = this.bookState?.[bookId];
     return !!progress?.metadata?.started;
   }
-};
+}
 
 export default state;

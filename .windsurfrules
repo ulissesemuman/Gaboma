@@ -7,7 +7,7 @@ Visão geral:
 - Os principais módulos são:
   - [engine/state.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/state.js:0:0-0:0): Gerenciamento do estado do aplicativo.
   - [engine/Utils.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/Utils.js:0:0-0:0): Funções úteis para manipulação de dados e requisições HTTP.
-  - [engine/BookManager.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/BookManager.js:0:0-0:0): Gerenciamento de livros, incluindo carregamento de dados e manipulação de idiomas.
+  - [engine/BookLoader.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/BookLoader.js:0:0-0:0): Gerenciamento de livros, incluindo carregamento de dados e manipulação de idiomas.
   - [engine/i18n.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/i18n.js:0:0-0:0): Internacionalização de texto.
   - [engine/fontManager.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/fontManager.js:0:0-0:0): Gerenciamento de fontes.
   - [engine/UIManager.js](cci:7://file:///f:/Junior/Desenvolvimento%20de%20Jogos/Livro-jogo/alpha_0.02/engine/UIManager.js:0:0-0:0): Orquestração do UI, incluindo a inicialização e a manipulação de elementos do DOM.

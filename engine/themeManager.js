@@ -1,4 +1,4 @@
-import { BookManager } from "./bookManager.js";
+import { BookLoader } from "./data/bookLoader.js";
 import state from "./core/state.js";
 
 export function getThemesList() {
@@ -58,7 +58,7 @@ export function resolveTheme(bookId) {
 
   if (bookId) {
     const bookState = state.bookState?.[bookId]; 
-    const book = BookManager.getCurrentBook();
+    const book = BookLoader.getCurrentBook();
 
     if (bookState && bookState.theme) {
       return bookState.theme;

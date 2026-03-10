@@ -1,7 +1,7 @@
 import state from "../core/state.js";
-import { ExpressionEvaluator } from "./expressionsEvaluator.js";
+import { Expressions} from "./expressions.js";
 
-function resolveActionEffects(rawEffects = []) {
+export function resolveActionEffects(rawEffects = []) {
   const resolvedEffects = [];
   const diceEvents = [];
 
@@ -16,7 +16,7 @@ function resolveActionEffects(rawEffects = []) {
     switch (effect.type) {
 
       case "addVar": {
-        const value = ExpressionEvaluator.evaluateExpression(
+        const value = Expressions.evaluate(
           effect.value,
           context,
           { allowDice: true, diceEvents }
@@ -34,7 +34,7 @@ function resolveActionEffects(rawEffects = []) {
       case "setVar": {
         const current = context.variables?.[effect.id] ?? 0;
 
-        const value = ExpressionEvaluator.evaluateExpression(
+        const value = Expressions.evaluate(
           effect.value,
           context,
           { allowDice: true, diceEvents }
@@ -50,7 +50,7 @@ function resolveActionEffects(rawEffects = []) {
       }
 
       case "addItem": {
-        const value = ExpressionEvaluator.evaluateExpression(
+        const value = Expressions.evaluate(
           effect.value ?? 1,
           context,
           { allowDice: true, diceEvents }
@@ -64,8 +64,8 @@ function resolveActionEffects(rawEffects = []) {
         break;
       }
 
-      case "removeItem": {
-        const value = ExpressionEvaluator.evaluateExpression(
+      case "useItem": {
+        const value = Expressions.evaluate(
           effect.value ?? 1,
           context,
           { allowDice: true, diceEvents }
@@ -74,13 +74,62 @@ function resolveActionEffects(rawEffects = []) {
         resolvedEffects.push({
           type: "addItem",
           id: effect.id,
-          delta: -value
+          delta: -value,
+          action: "use"
+        });
+        break;
+      }        
+
+      case "dropItem": {
+        const value = Expressions.evaluate(
+          effect.value ?? 1,
+          context,
+          { allowDice: true, diceEvents }
+        );
+
+        resolvedEffects.push({
+          type: "addItem",
+          id: effect.id,
+          delta: -value,
+          action: "drop"
         });
         break;
       }
 
+      case "giveItem": {
+        const value = Expressions.evaluate(
+          effect.value ?? 1,
+          context,
+          { allowDice: true, diceEvents }
+        );
+
+        resolvedEffects.push({
+          type: "addItem",
+          id: effect.id,
+          delta: -value,
+          action: "give"
+        });
+        break;
+      }
+
+      case "lostItem": {
+        const value = Expressions.evaluate(
+          effect.value ?? 1,
+          context,
+          { allowDice: true, diceEvents }
+        );
+
+        resolvedEffects.push({
+          type: "addItem",
+          id: effect.id,
+          delta: -value,
+          action: "lost"
+        });
+        break;
+      }      
+
       case "rollChance": {
-        const chance = ExpressionEvaluator.evaluateExpression(
+        const chance = Expressions.evaluate(
           effect.value,
           context,
           { allowDice: false }

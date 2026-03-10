@@ -1,8 +1,9 @@
-import state from "./core/state.js";
-import { Utils } from "./utils.js";
-import { t } from "./i18n.js";
-import { ThemeManager } from "./themeManager.js";
-import { FontManager } from "./fontManager.js";
+import state from "../core/state.js";
+import { FetchUtils } from "../utils/fetchUtils.js";
+import { t } from "../i18n.js";
+import { ThemeManager } from "../themeManager.js";
+import { FontManager } from "../fontManager.js";
+import { StoryAssembler } from "./storyAssembler.js";
 
 // ---------- Manifest ----------
 
@@ -11,7 +12,7 @@ async function loadBookManifest(bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-  return Utils.fetchJSON(`books/${bookId}/book.json`);
+  return FetchUtils.fetchJSON(`books/${bookId}/book.json`);
 }
 
 // ---------- Library ----------
@@ -44,7 +45,7 @@ export async function loadBookLanguageList(bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-  return Utils.fetchJSON(
+  return FetchUtils.fetchJSON(
     `books/${bookId}/language/index.json`
   );
 }
@@ -56,7 +57,7 @@ export async function loadBookLocalizedData(bookId) {
 
   const language = await resolveBookLanguage(bookId);
 
-  return Utils.fetchJSON(
+  return FetchUtils.fetchJSON(
     `books/${bookId}/language/${language}.json`
   );
 }
@@ -130,37 +131,14 @@ let currentBook = null;
 const bookCache = new Map();
 
 async function loadBooksList() {
-  return Utils.fetchJSON("books/index.json");
-}
-
-async function loadBookStory(bookId) {
-  if (!bookId) {
-    throw new Error(t("error.invalidBook"));
-  }
-
-  const basePath = `books/${bookId}/story`;
-
-  const story = await Utils.fetchJSON(`${basePath}/story.json`);
-
-  const variables = await Utils.fetchJSONOptional(`${basePath}/variables.json`);
-  const items = await Utils.fetchJSONOptional(`${basePath}/items.json`);
-  const enemies = await Utils.fetchJSONOptional(`${basePath}/enemies.json`);
-  const highlights = await Utils.fetchJSONOptional(`${basePath}/highlights.json`);  
-
-  return {
-    ...story,
-    variables: variables ?? {},
-    items: items ?? {},
-    enemies: enemies ?? {},
-    highlights: highlights ?? {}
-  };
+  return FetchUtils.fetchJSON("books/index.json");
 }
 
 export function getCurrentBook() {
   return currentBook;
 }
 
-export function setCurrentBook(bookData) {
+function setCurrentBook(bookData) {
   if (!bookData || !bookData.manifest || !bookData.manifest.id) {
     throw new Error(t("error.invalidBook"));
   }
@@ -175,31 +153,7 @@ export async function initBookState(bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-/*const initialEnemies = {};
-
-if (story.enemyInstances) {
-  Object.keys(story.enemyInstances).forEach(id => {
-    initialEnemies[id] = {
-      defeated: false
-    };
-  });
-}*/
-
-/*bookState = {
-  ...
-  enemies: {
-    defeated: {},
-  },
-  combat: {
-    activeEnemyId: null,
-    hp: null,
-    round: 0
-  }
-    state.bookState[bookId].enemies.defeated[enemyInstanceId] = true;
-}*/
-
-
-  const book = await getCurrentBook();
+  const book = getCurrentBook();
   const story = book.story;
 
   const language = await resolveBookLanguage(bookId);
@@ -251,7 +205,7 @@ export async function loadBook(bookId) {
   }
 
   const manifest = await loadBookManifest(bookId);
-  const story = await loadBookStory(bookId);
+  const story = await StoryAssembler.loadBookStory(bookId);
 
   const book = {
     manifest,
@@ -286,7 +240,7 @@ export async function getBookHomeConfig(bookId) {
   };
 }
 
-export const BookManager = {
+export const BookLoader = {
   loadLibrary, 
   resetLibraryCache,
   resolveBookLanguage,
@@ -296,7 +250,6 @@ export const BookManager = {
   loadBookLocalizedData, 
   initBookState,
   getCurrentBook, 
-  setCurrentBook, 
   loadBook,
   getBookHomeConfig
 };

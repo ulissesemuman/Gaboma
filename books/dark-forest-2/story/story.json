@@ -8,7 +8,7 @@
         "chapter.intro.text.line_2"
       ],
       "choices": [
-        { "text": "chapter.intro.choice.forest", "next": "forest" },
+        { "text": "chapter.intro.choice.forest", "next": "ruins" },
         { "text": "chapter.intro.choice.village", "next": "village" }
       ],
       "onEnter": {
@@ -36,7 +36,14 @@
       ],
       "choices": [
         { "text": "chapter.village.choice.house", "next": "house" },
-        { "text": "chapter.village.choice.intro", "next": "intro" }
+        { "text": "chapter.village.choice.intro", "next": "intro" },
+        { 
+          "text": "chapter.village.choice.map", 
+          "next": "map",
+          "conditions": {
+            "hasItem": "map"
+          } 
+        }
       ]
     },
 
@@ -68,26 +75,22 @@
             { "type": "addItem", "id": "map", "value": 1 }
           ],
           "conditions": {
-            "hasNotItem": "map"
+            "hasNoItem": "map"
           } 
         },
         { 
           "text": "chapter.house.choice.torch", 
-          "next": "torch",
+          "next": "village",
+          "effects": [
+            { "type": "addItem", "id": "torch", "value": 1 }
+          ],          
           "conditions": {
             "all": [
               { "hasItem": "map" },
-              { "hasNotItem": "torch" },
-              { "chapterVisited": { "id": "village", "min": 2 }}
+              { "hasNoItem": "torch" },
+              { "visitCount": { "id": "village", "min": 2 }}
             ]
           }
-        },
-        { 
-          "text": "chapter.house.choice.map", 
-          "next": "map",
-          "conditions": {
-            "hasItem": "map"
-          } 
         }
       ]
     },
@@ -119,9 +122,11 @@
       "choices": [
         {
           "text": "chapter.mysterious_portal.choice.strike_with_axe",
-
-
-
+          "conditions": {
+              "variables": {
+                "doorHits": { "lt": 3 }
+              }
+          },          
           "attempt": {
             "effects": [
               {
@@ -129,7 +134,6 @@
                 "id": "doorHits",
                 "value": {
                   "add": [
-                    { "var": "doorHits" },
                     1
                   ]
                 }
@@ -141,20 +145,26 @@
                   "doorHits": { "gte": 3 }
                 }
               },
-              "effects": [
-                { "type": "setVar", "id": "doorHits", "value": 0 }
-              ],
               "next": "ruins",
               "message": "Você conseguiu destruir a porta!"
             },
             "failure": {
               "effects": [
-                { "type": "addVar", "id": "hp", "value": -1 }
+                { "type": "addVar", "id": "life", "value": -1 }
               ],
               "message": "Você se machucou tentando."
             }
           }
-        }
+        },
+        {
+          "text": "chapter.mysterious_portal.choice.enter",
+          "conditions": {
+              "variables": {
+                "doorHits": { "gte": 3 }
+              }
+          },
+          "next": "ruins"
+        }  
       ]
     },
 
@@ -165,6 +175,11 @@
       "choices": [
         {
           "text": "chapter.treasure.choice.use_lockpick",
+          "conditions": {
+            "variables": {
+              "lockPickSucess": { "lt": 30 }       
+            }
+          },          
           "attempt": {
             "effects": [
               {
@@ -186,15 +201,14 @@
                 }
               },
               "effects": [
-                { "type": "addItem", "id": "gold", "value": 20 },
-                { "type": "setVar", "id": "lockPickSucess", "value": 0 }
+                { "type": "addItem", "id": "gold", "value": 20 }
               ],
-              "next": "ruins",
+              "next": "village",
               "message": "Você conseguiu abrir o baú!"
             },
             "failure": {
               "effects": [
-                { "type": "addVar", "id": "lockPick", "value": -1 }
+                { "type": "useItem", "id": "lockpick", "value": 1 }
               ],
               "message": "Você quebrou um lockpick, ainda resta(m) {lockPick}."
             }
@@ -214,7 +228,7 @@
       ],
       "onEnter": {
         "effects": [
-          { "type": "addVar", "id": "hp", "value": -1 }
+          { "type": "addVar", "id": "life", "value": -1 }
         ]
       },
       "choices": [
@@ -228,7 +242,9 @@
           "conditions": {
             "all": [
               { "hasItem": "torch" },
-              { "type": "chapterVisited", "chapter": "village", "min": 2 }
+              { "itemCount": { "id": "torch", "min": 1 } },
+              { "hasVisited": "village"},
+              { "visitCount": { "id": "village", "min": 2 }}
             ]
           }
         }

@@ -1,7 +1,9 @@
-import state from "./core/state.js";
-import { BookManager } from "./bookManager.js";
+import state from "./state.js";
 import { Engine } from "./engine.js";
-import { Effects } from "./flow/effects.js";
+import { Effects } from "../flow/effects.js";
+import { ChapterResolver } from "../flow/chapterResolver.js";
+import { FeedbackResolver } from "../ui/feedbackResolver.js";
+import { History } from "../flow/history.js";
 
 let currentStory = null;
 
@@ -16,12 +18,10 @@ export function startStory() {
 export function goToChapter(chapterId) {
 
   const bookId = state.currentBookId;
+  const story = getCurrentStory();
 
-  const book = BookManager.getCurrentBook();
-  const story = book.story;
-
-  const currentChapterId = getcurrentChapterId();
-  let chapter = getcurrentChapter();
+  const currentChapterId = getCurrentChapterId();
+  let chapter = getCurrentChapter();
   let resolved =  {
       ...chapter,
       choices: []
@@ -47,18 +47,18 @@ export function goToChapter(chapterId) {
       }
     });
 
-    chapter = getcurrentChapter();    
+    chapter = getCurrentChapter();    
 
     if (chapter.onEnter && chapter.onEnter?.effects) {
       const { effects, diceEvents } =
         Effects.resolveActionEffects(chapter.onEnter.effects);
 
-      const events =
-        Engine.resolveActionEvents(diceEvents, effects);
-
       Engine.applyEffects(effects);
 
-      Engine.registerStateEvent({
+      const events =
+        FeedbackResolver.resolveActionEvents(diceEvents, effects);
+
+      History.registerStateEvent({
         chapterId: chapter.id,
         source: "onEnter",
         events,
@@ -67,13 +67,13 @@ export function goToChapter(chapterId) {
     };
   }
 
-  resolved = Engine.resolveChapter(chapter);
+  resolved = ChapterResolver.resolveChapter(chapter);
 
   return resolved;
 }
 
-export function getcurrentChapter() {
-  let currentChapterId = state.bookState[state.currentBookId].progress.currentChapterId;
+export function getCurrentChapter() {
+  let currentChapterId = getCurrentChapterId();
   currentChapterId = currentChapterId ?? currentStory.startChapterId;
 
   const chapter = {
@@ -84,7 +84,7 @@ export function getcurrentChapter() {
   return chapter;
 }
 
-export function getcurrentChapterId() {
+function getCurrentChapterId() {
   return state.bookState[state.currentBookId].progress.currentChapterId;
 }
 
@@ -96,7 +96,6 @@ export const Reader = {
   loadStory,
   startStory,
   goToChapter,
-  getcurrentChapter,
-  getcurrentChapterId,
+  getCurrentChapter,
   getCurrentStory
 };
