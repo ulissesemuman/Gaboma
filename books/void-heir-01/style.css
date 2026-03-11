@@ -1,0 +1,16 @@
+/* ── 	OVERRIDdEn STYLES ──────────────────────────────────────── */
+
+body[data-theme="void-purple"] {
+  --backdrop-bg: #1a003388;
+  --ui-bg: #0d001a;
+  --ui-text: #e6ccff;
+  --paper-bg: #150026;
+  --paper-text: #d9b3ff;
+  --button-bg: #400080;
+  --button-text: #ffffff;
+  --button-hover-bg: #5900b3;
+  --bottom-bar-bg: #0a0014;
+  --config-overlay-bg: rgba(30, 0, 60, 0.75);
+  --config-popup-bg: #150026;
+  --config-popup-text: #d9b3ff;
+}

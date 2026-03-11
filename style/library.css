@@ -1,0 +1,65 @@
+/* ══════════════════════════════════════════════════════════════════
+   library.css — book library grid and book home screen
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Book home ──────────────────────────────────────────────────── */
+#book-home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+.book-home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.book-cover-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.book-cover {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+#toggle-cover {
+  position: absolute;
+  bottom: 0px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#toggle-cover:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.book-summary {
+  flex-shrink: 0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.book-actions {
+  flex-shrink: 0;
+  padding: 1rem;
+}

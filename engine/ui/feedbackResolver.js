@@ -1,5 +1,6 @@
-import { Reader } from '../core/reader.js';
-import { t, tb } from '../i18n.js';
+import { Reader } from "../core/reader.js";
+import { t } from "../i18n/globalI18n.js";
+import { tb } from "../i18n/bookI18n.js";
 
 export function resolveActionEvents(diceEvents = [], effects = []) {
   const events = [...diceEvents];
@@ -13,8 +14,9 @@ export function resolveActionEvents(diceEvents = [], effects = []) {
         const varConfig =
           story.variables?.[effect.id];
 
-        // só exibe se permitido
-        if (varConfig?.showInSheet !== false &&
+        // só exibe se visualFeedback não for explicitamente false
+        // padrão: true (exibe) — author opt-out com visualFeedback: false
+        if (varConfig?.visualFeedback !== false &&
             effect.delta !== 0) {
 
           events.push({
@@ -98,7 +100,7 @@ export function resolveVarDeltaText(effect) {
 
 export function resolveItemDeltaText(effect) {
   const story = Reader.getCurrentStory();
-  const itemConfig = story.items?.[effect.id];
+  const itemConfig = story.items?.items?.[effect.id];
 
   const itemLabel = resolveLabel(
     itemConfig?.label,

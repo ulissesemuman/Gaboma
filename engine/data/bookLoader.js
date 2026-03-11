@@ -1,8 +1,9 @@
 import state from "../core/state.js";
+import { EnemyRegistry } from "../combat/enemyRegistry.js";
 import { FetchUtils } from "../utils/fetchUtils.js";
-import { t } from "../i18n.js";
-import { ThemeManager } from "../themeManager.js";
-import { FontManager } from "../fontManager.js";
+import { t } from "../i18n/globalI18n.js";
+import { ThemeManager } from "../ui/themeManager.js";
+import { FontManager } from "../ui/fontManager.js";
 import { StoryAssembler } from "./storyAssembler.js";
 
 // ---------- Manifest ----------
@@ -175,25 +176,31 @@ export async function initBookState(bookId) {
   }
 
   const initialItems = {};
-  if (story.items) {
-    Object.entries(story.items).forEach(
+  if (story.items?.items) {
+    Object.entries(story.items.items).forEach(
       ([id, config]) => {
         initialItems[id] = config.initial ?? 0;
       }
     );
   }
 
+  // Store playerHpVar/playerXpVar so combatEngine can reference them
+  // without needing to know the book structure
+  const playerHpVar = story.player?._playerHpVar ?? null;
+  const playerXpVar = story.player?._playerXpVar ?? null;
+
   state.persistGameData(bookId, {
     progress: {
       variables: initialVariables,
-      items: initialItems
+      items: initialItems,
+      _playerHpVar: playerHpVar,
+      _playerXpVar: playerXpVar
     },
     settings: {
       language: language,
       font: font,
       theme: theme
     },
-
   });
  }
 
@@ -206,6 +213,9 @@ export async function loadBook(bookId) {
 
   const manifest = await loadBookManifest(bookId);
   const story = await StoryAssembler.loadBookStory(bookId);
+
+  // Initialize enemy registry with data from this book
+  EnemyRegistry.setEnemyData(story.enemies ?? null);  
 
   const book = {
     manifest,
@@ -240,6 +250,29 @@ export async function getBookHomeConfig(bookId) {
   };
 }
 
+/**
+ * Injects a book-specific CSS override.
+ * If books/{bookId}/style.css does not exist, the browser silently ignores
+ * the 404 — no error handling needed.
+ */
+export function loadBookCSS(bookId) {
+  // Remove any previously loaded book CSS
+  unloadBookCSS();
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `books/${bookId}/style.css`;
+  link.id = "gaboma-book-style";
+  document.head.appendChild(link);
+}
+
+/**
+ * Removes the book-specific CSS override, restoring system styles.
+ */
+export function unloadBookCSS() {
+  document.getElementById("gaboma-book-style")?.remove();
+}
+
 export const BookLoader = {
   loadLibrary, 
   resetLibraryCache,
@@ -251,5 +284,7 @@ export const BookLoader = {
   initBookState,
   getCurrentBook, 
   loadBook,
-  getBookHomeConfig
+  getBookHomeConfig,
+  loadBookCSS,
+  unloadBookCSS
 };

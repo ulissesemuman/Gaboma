@@ -8,24 +8,52 @@
         "chapter.intro.text.line_2"
       ],
       "choices": [
-        { "text": "chapter.intro.choice.forest", "next": "ruins" },
+        { "text": "chapter.intro.choice.forest", "next": "forest" },
         { "text": "chapter.intro.choice.village", "next": "village" }
       ],
-      "onEnter": {
+      "onFirstEnter": {
         "effects": [
           { "type": "addVar", "id": "life", "value": 4 }
+        ]
+      },
+      "onEnter": {
+        "effects": [
+          { "type": "addVar", "id": "life", "value": 1 }
         ]
       }
     },
 
     "forest": {
       "text": [
-        "chapter.forest.text.line_1",
-        "chapter.forest.text.line_2"
+        "chapter.forest.text.line_1"
       ],
       "choices": [
-        { "text": "chapter.forest.choice.noise", "next": "noise" },
-        { "text": "chapter.forest.choice.intro", "next": "intro" }
+        { 
+          "text": "chapter.forest.choice.noise", 
+          "narrative": "chapter.forest.narrative.line_1",
+          "next": "noise",
+          "conditions": {
+            "variables": {
+              "noise": { "eq": false }
+            }
+          },
+          "effects": [
+              { "type": "setVar", "id": "noise", "value": true }
+            ]
+        },
+        { 
+          "text": "chapter.forest.choice.intro", 
+          "next": "intro"  
+        },
+        { 
+          "text": "chapter.forest.choice.deepForest", 
+          "next": "deepForest",
+          "conditions": {
+            "variables": {
+              "noise": { "eq": true }
+            }
+          }  
+        }
       ]
     },
 
@@ -60,15 +88,39 @@
     "house": {
       "text": [
         "chapter.house.text.line_1",
-        "chapter.house.text.line_2",
-        "chapter.house.text.line_3"
+        "chapter.house.text.line_2"
       ],
       "choices": [
         { 
           "text": "chapter.house.choice.village",
-          "next": "village"
+          "next": "village",
+          "conditions": {
+            "any": [
+              { "hasNoItem": "map" },
+              { "hasNoItem": "torch" }
+            ]
+          }          
         },
         { 
+          "narrative": "chapter.house.narrative.village.line_1",
+          "text": "chapter.house.choice.village",
+          "next": "village",
+          "conditions": {
+            "all": [
+              { "hasItem": "map" },
+              { "hasItem": "torch" }
+            ]
+          }
+        },
+        { 
+          "narrative": [
+            "chapter.house.narrative.map.line_1",
+            "chapter.house.narrative.map.line_2",
+            "chapter.house.narrative.map.line_3",
+            "chapter.house.narrative.map.line_4",
+            "chapter.house.narrative.map.line_5",
+            "chapter.house.narrative.map.line_6"
+          ],
           "text": "chapter.house.choice.map", 
           "next": "map",
           "effects": [
@@ -79,6 +131,13 @@
           } 
         },
         { 
+          "narrative": [
+            "chapter.house.narrative.torch.line_1",
+            "chapter.house.narrative.torch.line_2",
+            "chapter.house.narrative.torch.line_3",
+            "chapter.house.narrative.torch.line_4",
+            "chapter.house.narrative.torch.line_5"
+          ],
           "text": "chapter.house.choice.torch", 
           "next": "village",
           "effects": [
@@ -88,7 +147,7 @@
             "all": [
               { "hasItem": "map" },
               { "hasNoItem": "torch" },
-              { "visitCount": { "id": "village", "min": 2 }}
+              { "hasVisited": "ruins"}
             ]
           }
         }
@@ -146,13 +205,13 @@
                 }
               },
               "next": "ruins",
-              "message": "Você conseguiu destruir a porta!"
+              "startMessage": "Você conseguiu destruir a porta!"
             },
             "failure": {
               "effects": [
                 { "type": "addVar", "id": "life", "value": -1 }
               ],
-              "message": "Você se machucou tentando."
+              "endMessage": "A porta cedeu, mas você se machucou com os estilhaços."
             }
           }
         },
@@ -164,20 +223,33 @@
               }
           },
           "next": "ruins"
-        }  
+        },
+        {
+          "text": "chapter.mysterious_portal.choice.forest",
+          "next": "forest"
+        }        
       ]
     },
 
     "treasure": {
       "text": [
-        "chapter.treasure.text.line_1"
+        "chapter.treasure.text.line_1",
+        "chapter.treasure.text.line_2"
       ],
       "choices": [
         {
           "text": "chapter.treasure.choice.use_lockpick",
+          "narrative": [
+            "chapter.treasure.narrative.treasure_found_line_1",
+            "chapter.treasure.narrative.treasure_found_line_2",
+            "chapter.treasure.narrative.treasure_found_line_3",
+            "chapter.treasure.narrative.treasure_found_line_4",
+            "chapter.treasure.narrative.treasure_found_line_5",
+            "chapter.treasure.narrative.treasure_found_line_6"
+          ],
           "conditions": {
             "variables": {
-              "lockPickSucess": { "lt": 30 }       
+              "lockPickSucess": { "lt": 30 }
             }
           },          
           "attempt": {
@@ -201,18 +273,28 @@
                 }
               },
               "effects": [
-                { "type": "addItem", "id": "gold", "value": 20 }
+                { "type": "addItem", "id": "gold", "value": 20 },
+                { "type": "addItem", "id": "necklace", "value": 1 }
               ],
+              "endMessage": "Você coloca o colar no pescoço.",
               "next": "village",
-              "message": "Você conseguiu abrir o baú!"
+              "startMessage": "Você conseguiu abrir o baú!"
             },
             "failure": {
               "effects": [
                 { "type": "useItem", "id": "lockpick", "value": 1 }
               ],
-              "message": "Você quebrou um lockpick, ainda resta(m) {lockPick}."
+              "endMessage": "Ainda resta(m) {lockpick} gazuas."
             }
           }
+        },
+        {
+          "text": "chapter.treasure.choice.village",
+          "narrative": "chapter.treasure.narrative.village_line_1",
+          "next": "village",
+          "conditions": {
+            "hasItem": "necklace"
+           }
         },
         {
           "text": "chapter.treasure.choice.village",
@@ -223,30 +305,48 @@
 
     "ruins": {
       "text": [
-        "chapter.ruins.text.line_1",
-        "chapter.ruins.text.line_2"
+        "chapter.ruins.text.line_1"
       ],
-      "onEnter": {
-        "effects": [
-          { "type": "addVar", "id": "life", "value": -1 }
-        ]
-      },
       "choices": [
         { 
-          "text": "chapter.ruins.choice.intro", 
-          "next": "intro"
+          "text": "chapter.ruins.choice.mysterious_portal", 
+          "next": "mysterious_portal"
         },
         { 
-          "text": "chapter.ruins.choice.ruins_door", 
-          "next": "ruins_door",
+          "text": "chapter.ruins.choice.forest",
+          "narrative": [
+            "chapter.ruins.narratrive.forest.line_1",
+            "chapter.ruins.narratrive.forest.line_2",
+            "chapter.ruins.narratrive.forest.line_3"
+          ],
+          "onShow": {
+            "effects": [
+              { "type": "addVar", "id": "life", "value": -1 }
+            ],
+            "endMessage": "Você tropeçou e machucou o dedão do pé."
+          },
+          "conditions": {
+            "hasNoItem": "torch"
+          },
+          "next": "forest"
+        },
+        {
+          "text": "chapter.ruins.choice.ruins_door",
+          "narrative": [
+            "chapter.ruins.narratrive.door.line_1",
+            "chapter.ruins.narratrive.door.line_2",
+            "chapter.ruins.narratrive.door.line_3",
+            "chapter.ruins.narratrive.door.line_4"
+          ],
           "conditions": {
             "all": [
               { "hasItem": "torch" },
               { "itemCount": { "id": "torch", "min": 1 } },
               { "hasVisited": "village"},
-              { "visitCount": { "id": "village", "min": 2 }}
+              { "visitCount": { "id": "village", "min": 1 }}
             ]
-          }
+          },
+          "next": "ruins_door"
         }
       ]
     },
@@ -258,23 +358,52 @@
       ],
       "choices": [
         {
-          "text": "chapter.mysterious_portal.choice.strike_with_axe",
+          "text": "chapter.ruins_door.choice.strike_with_axe",
+          "narrative": [
+            "chapter.ruins_door.narrative.line_1",
+            "chapter.ruins_door.narrative.line_2",
+            "chapter.ruins_door.narrative.line_3",
+            "chapter.ruins_door.narrative.line_4"
+          ],
           "attempt": {
-            "effects": { 
-              "increment": { "doorHits": 1 } 
-            },
+            "effects": [ 
+                {"increment": { "doorHits": 1 } }
+            ],
             "success": {
               "conditions": {
-                "variables": { "doorHits": 3 }
+                "variables": { "doorHits":  { "gte": 3 } }
               },
-              "next": "porta_aberta"
+              "next": "ruins_room"
             },
             "failure": {
               "message": "Ainda não abriu."
             }
           }
+        },
+        { 
+          "text": "chapter.ruins_door.choice.ruins", 
+          "next": "ruins"
         }
       ]
+    },
+
+    "ruins_room": {
+      "text": [
+        "chapter.ruins_room.text.line_1",
+        "chapter.ruins_room.text.line_2"
+       ],
+       "choices": [
+          { 
+            "text": "chapter.ruins_room.choice.intro", 
+            "next": "intro"
+          }
+        ],
+        "onEnter": {
+          "effects": [
+            { "type": "startCombat", "instanceId": "ice_mage_01" },
+            { "type": "startCombat", "instanceId": "orc_guard" }
+          ]
+      }       
     }
   }
 }

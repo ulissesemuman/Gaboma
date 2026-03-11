@@ -1,0 +1,92 @@
+/* ══════════════════════════════════════════════════════════════════
+   dialog.css — modal dialog overlay and box
+   ══════════════════════════════════════════════════════════════════ */
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 9999;
+}
+
+.dialog-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.dialog-box {
+  background: var(--paper-bg);
+  color: var(--paper-text);
+  width: min(520px, 92%);
+  padding: 1.5rem;
+  border-radius: 14px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  transform: scale(0.92);
+  opacity: 0;
+  transition:
+    transform 220ms cubic-bezier(.2,.8,.2,1),
+    opacity 180ms ease;
+}
+
+.dialog-overlay.active .dialog-box {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.dialog-content {
+  display: flex;
+  align-items: stretch;
+}
+
+#dialog-title {
+  cursor: grab;
+  user-select: none;
+}
+
+#dialog-title:active {
+  cursor: grabbing;
+}
+
+.dialog-icon {
+  width: 17%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.dialog-message {
+  width: 83%;
+  padding-left: 1rem;
+  white-space: pre-line;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.dialog-buttons button.primary {
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-weight: bold;
+}

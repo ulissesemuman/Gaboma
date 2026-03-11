@@ -1,46 +1,122 @@
-
 {
   "enemies": {
     "ice_mage": {
       "label": "enemy.iceMage",
       "description": "Um mago envolto em gelo.",
       "hp": 12,
-      "attacks": [
+
+      "actions": [
         {
-          "name": "Shard de Gelo",
-          "dice": { "count": 2, "sides": 6 },
-          "type": "magic"
+          "id": "ice_shard",
+          "label": "enemy.iceMage.action.iceShard",
+          "weight": 70,
+          "conditions": null,
+          "effects": [
+            { "type": "addVar", "id": "hp", "value": { "multiply": [-1, { "dice": { "count": 2, "sides": 6 } }] } }
+          ]
+        },
+        {
+          "id": "freeze",
+          "label": "enemy.iceMage.action.freeze",
+          "weight": 30,
+          "conditions": { "lte": [{ "var": "hp" }, 6] },
+          "effects": [
+            { "type": "addVar", "id": "hp", "value": -1 }
+          ]
+        },
+        {
+          "id": "flee",
+          "label": "enemy.iceMage.action.flee",
+          "weight": 10,
+          "conditions": { "lte": [{ "var": "hp" }, 2] },
+          "effects": [],
+          "endsCombat": "fled_enemy"
         }
-      ]
+      ],
+
+      "onVictory": {
+        "next": null,
+        "effects": [
+          { "type": "addVar", "id": "xp", "value": 20 }
+        ]
+      },
+
+      "onDefeat": {
+        "next": "game_over",
+        "effects": []
+      }
     },
 
     "orc": {
       "label": "enemy.orc",
       "description": "Um orc brutal.",
       "hp": 8,
-      "attacks": [
+
+      "actions": [
         {
-          "name": "Machado",
-          "dice": { "count": 1, "sides": 8 },
-          "type": "physical"
+          "id": "club_hit",
+          "label": "enemy.orc.action.clubHit",
+          "weight": 70,
+          "conditions": null,
+          "effects": [
+            { "type": "addVar", "id": "hp", "value": { "multiply": [-1, { "dice": { "count": 2, "sides": 6 } }] } }
+          ]
+        },
+        {
+          "id": "flee",
+          "label": "enemy.orc.action.flee",
+          "weight": 10,
+          "conditions": { "lte": [{ "var": "hp" }, 2] },
+          "effects": [],
+          "endsCombat": "fled_enemy"
         }
-      ]
+      ],
+
+      "onVictory": {
+        "next": null,
+        "effects": [
+          { "type": "addVar", "id": "xp", "value": 4 }
+        ]
+      },
+
+      "onDefeat": {
+        "next": "game_over",
+        "effects": []
+      }      
     }
   },
 
   "enemyInstances": {
     "ice_mage_01": {
       "type": "ice_mage",
-      "persistent": false
+      "respawn": false
     },
     "ice_mage_02": {
       "type": "ice_mage",
-      "loot": "potion",
-      "persistent": false
+      "respawn": false,
+      "overrides": {
+        "hp": 20
+      },
+      "onVictory": {
+        "next": null,
+        "effects": [
+          { "type": "addItem", "id": "potion", "value": 1 },
+          { "type": "addItem", "id": "gold", "value": 20 }
+        ]
+      }
     },
     "orc_guard": {
       "type": "orc",
-      "persistent": false
+      "respawn": false,
+      "overrides": {
+        "hp": 20
+      },
+      "onVictory": {
+        "next": null,
+        "effects": [
+          { "type": "addItem", "id": "gold", "value": 3 }
+        ]
+      }
     }
   }
 }

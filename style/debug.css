@@ -1,0 +1,161 @@
+/* ══════════════════════════════════════════════════════════════════
+   debug.css — author debug panel (debugPanel.js)
+   ══════════════════════════════════════════════════════════════════ */
+
+#gaboma-debug-btn {
+  position: fixed;
+  bottom: 60px;
+  left: 8px;
+  z-index: 9000;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(30,30,30,0.82);
+  color: #7fff7f;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: background 0.15s;
+}
+
+#gaboma-debug-btn:hover {
+  background: rgba(50,50,50,0.95);
+}
+
+#gaboma-debug-panel {
+  position: fixed;
+  bottom: 100px;
+  left: 8px;
+  z-index: 8999;
+  width: 280px;
+  max-height: 60vh;
+  background: rgba(18,18,18,0.96);
+  color: #c8f5c8;
+  font-family: monospace;
+  font-size: 11px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#gaboma-debug-panel.open {
+  display: flex;
+}
+
+#gaboma-debug-header {
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.4);
+  font-weight: bold;
+  font-size: 12px;
+  color: #7fff7f;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+#gaboma-debug-body {
+  overflow-y: auto;
+  padding: 8px 10px;
+  flex: 1;
+}
+
+.dbg-section {
+  margin-bottom: 10px;
+}
+
+.dbg-section-title {
+  color: #ffd700;
+  font-weight: bold;
+  margin-bottom: 3px;
+  border-bottom: 1px solid rgba(255,215,0,0.2);
+  padding-bottom: 2px;
+}
+
+.dbg-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 1px 0;
+  color: #c8f5c8;
+}
+
+.dbg-key {
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
+}
+
+.dbg-val {
+  color: #7fdcff;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dbg-val.bool-true  { color: #7fff7f; }
+.dbg-val.bool-false { color: #ff7f7f; }
+.dbg-val.zero       { opacity: 0.35; }
+
+.dbg-chapter {
+  color: #ffb347;
+  word-break: break-all;
+}
+
+.dbg-empty {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* ── Opacity slider row ─────────────────────────────────────────── */
+#gaboma-debug-opacity-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.25);
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+#gaboma-debug-opacity-row label {
+  font-size: 10px;
+  color: #7fff7f;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+#gaboma-debug-opacity-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  outline: none;
+  cursor: pointer;
+}
+
+#gaboma-debug-opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #7fff7f;
+  cursor: pointer;
+}
+
+#gaboma-debug-opacity-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #7fff7f;
+  border: none;
+  cursor: pointer;
+}

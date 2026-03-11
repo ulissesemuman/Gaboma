@@ -10,21 +10,21 @@
     "label": "var.strength"
   },
 
-  "life": {
+  "hp": {
     "type": "number",
-    "description": "var.life.desc",
+    "description": "var.hp.desc",
     "initial": 10,
     "min": 0,
     "showInSheet": true,
     "visualFeedback": true,
-    "label": "var.life",
+    "label": "var.hp",
     "fatalAtZero": true
   },
 
   "maxLife": {
-    "type": "derived",
+    "type": "number",
     "description": "var.maxLife.desc",
-    "formula": "life + strength * 2",
+    "initial": "30",
     "showInSheet": true,
     "visualFeedback": true,
     "label": "var.maxLife"
@@ -61,6 +61,21 @@
   "lockPickSucess": {
     "type": "number",
     "initial": 0,
+    "showInSheet": false,
+    "visualFeedback": false
+  },
+
+  "xp": {
+    "type": "number",
+    "initial": 0,
+    "showInSheet": true,
+    "visualFeedback": true,
+    "label": "var.xp"
+  },
+
+  "noise": {
+    "type": "boolean",
+    "initial": false,
     "showInSheet": false,
     "visualFeedback": false
   }

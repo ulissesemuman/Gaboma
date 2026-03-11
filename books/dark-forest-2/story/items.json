@@ -7,8 +7,8 @@
     "stackable": false,
     "weight": 5,
     "consumable": false,
-    "effect": {
-      "onAcquire": [
+    "onAcquire": {
+      "effect": [
         { "type": "modifyVariable", "target": "strength", "value": 2 }
       ]
     }
@@ -22,8 +22,8 @@
     "stackable": false,
     "weight": 5,
     "consumable": false,
-    "effect": {
-      "onAcquire": [
+    "onAcquire": {
+      "effect": [
         { "type": "modifyVariable", "target": "strength", "value": 3 }
       ]
     }
@@ -75,6 +75,16 @@
     "category": "decoration",
     "description": "item.torch.desc",
     "icon": "torch.svg",
+    "stackable": false,
+    "weight": 1,
+    "consumable": false
+  },
+
+  "necklace": {
+    "label": "item.necklace",
+    "category": "decoration",
+    "description": "item.necklace.desc",
+    "icon": "necklace.svg",
     "stackable": false,
     "weight": 1,
     "consumable": false

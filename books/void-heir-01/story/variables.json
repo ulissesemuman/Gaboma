@@ -1,0 +1,74 @@
+{
+  "hp": {
+    "type": "number",
+    "initial": 20,
+    "min": 0,
+    "max": 20,
+    "showInSheet": true,
+    "fatalAtZero": true,
+    "visualFeedback": true,
+    "label": "var.hp"
+  },
+  "strength": {
+    "type": "number",
+    "initial": 5,
+    "showInSheet": true,
+    "visualFeedback": true,
+    "label": "var.strength"
+  },
+  "essence": {
+    "type": "number",
+    "initial": 0,
+    "showInSheet": true,
+    "visualFeedback": true,
+    "label": "var.essence"
+  },
+  "sanity": {
+    "type": "number",
+    "initial": 20,
+    "min": 0,
+    "showInSheet": true,
+    "visualFeedback": true,
+    "label": "var.sanity"
+  },
+  "altar_activated": {
+    "type": "boolean",
+    "initial": false,
+    "showInSheet": false,
+    "visualFeedback": false
+  },
+  "blood_line_revealed": {
+    "type": "boolean",
+    "initial": false,
+    "showInSheet": false
+  },
+  "guardians_blessing_active": {
+    "type": "boolean",
+    "initial": false,
+    "showInSheet": true,
+    "label": "var.label.blessing"
+  },
+  "helped_deserter": {
+    "type": "boolean",
+    "initial": false,
+    "showInSheet": false
+  },
+  "enigma_solved": {
+  "type": "boolean",
+  "initial": false,
+  "showInSheet": false
+  },
+  "_temp_roll": {
+  "type": "number",
+  "initial": 0,
+  "showInSheet": false,
+  "visualFeedback": false
+  },
+  "agility": {
+  "type": "number",
+  "initial": 5,
+  "showInSheet": true,
+  "visualFeedback": false,
+  "label": "var.agility"
+}
+}

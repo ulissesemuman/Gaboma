@@ -1,0 +1,38 @@
+{
+  "manifestVersion": "1.0.0",
+  "id": "void-heir-01",
+  "title": "O Herdeiro do Vazio",
+  "author": "Gemini & Ulisses",
+  "version": "1.0.0",
+  "languages": ["pt-br"],
+  "defaultLanguage": "pt-br",
+  "cover": "assets/void_cover.png",
+  "summary": "A escuridão não é apenas a ausência de luz; é uma presença que observa.",
+  "defaultTheme": "void-purple",
+  "extraThemes": [
+    { "id": "void-purple", "name": "Void purple" }
+  ],
+  "defaultFont": "cinzel",
+  "extraFonts": [
+    { "id": "uncial", "name": "Uncial Antiqua" },
+    { "id": "medieval", "name": "MedievalSharp" }
+  ],
+  "dice": {
+    "count": 1,
+    "sides": 20
+  },
+  "home": {
+    "showTitle": true,
+    "showSummary": true,
+    "cover": {
+      "front": "front.jpg",
+      "back": "back.jpg",
+      "allowFlip": true
+    }
+  },
+  "settings": {
+    "highlightItems": true,
+    "highlightVariables": true,
+    "highlightLore": true
+  }
+}

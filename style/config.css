@@ -1,0 +1,72 @@
+/* ══════════════════════════════════════════════════════════════════
+   config.css — settings overlay, popup and tabs
+   ══════════════════════════════════════════════════════════════════ */
+
+#config-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--config-overlay-bg);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#config-popup {
+  background: var(--config-popup-bg);
+  color: var(--config-popup-text);
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 280px;
+  font-family: sans-serif;
+}
+
+.config-tabs {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 1rem;
+}
+
+.config-tab {
+  flex: 1;
+  padding: 0.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 150ms ease;
+}
+
+.config-tab.active {
+  border-bottom: 2px solid var(--button-bg);
+  font-weight: 700;
+}
+
+.config-content {
+  min-height: 220px;
+}
+
+.config-panel {
+  display: none;
+}
+
+.config-panel.active {
+  display: block;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.config-disabled-hint {
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+.config-section label {
+  display: block;
+  margin-bottom: 4px;
+}

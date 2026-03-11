@@ -1,7 +1,8 @@
-import { BookLoader } from "./data/bookLoader.js";
-import state from "./core/state.js";
+import { BookLoader } from "../data/bookLoader.js";
+import state from "../core/state.js";
+import { t } from "../i18n/globalI18n.js";
 
-export function getThemesList() {
+export function getThemesList(bookId = null) {
   const themes = [
     { id: "gaboma", name: "Gaboma" },
     { id: "light", name: "Light" },
@@ -18,9 +19,16 @@ export function getThemesList() {
     { id: "yellow", name: "Yellow" },
     { id: "orange", name: "Orange" },
     { id: "brown", name: "Brown" },
-  ]; 
+  ];
 
-  return themes;
+  if (!bookId) return themes;
+
+  const book = BookLoader.getCurrentBook(bookId);
+  const extra = book?.manifest?.extraThemes || [];
+
+  if (extra.length === 0) return themes;
+
+  return [...extra, ...themes];
 }
 
 export function setTheme(theme, bookId = null) {

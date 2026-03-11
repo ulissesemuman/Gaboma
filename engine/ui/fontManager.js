@@ -1,10 +1,21 @@
-import state from "./core/state.js";
-import { BookLoader } from "./data/bookLoader.js";
-import { FetchUtils } from "./utils/fetchUtils.js";
-//import t from "./i18n.js";
+import state from "../core/state.js";
+import { BookLoader } from "../data/bookLoader.js";
+import { FetchUtils } from "../utils/fetchUtils.js";
+import { t } from "../i18n/globalI18n.js";
 
-export async function getFontsList() {
-  return FetchUtils.fetchJSON("assets/fonts.json");
+export async function getFontsList(bookId = null) {
+  const base = await FetchUtils.fetchJSON("assets/fonts.json");
+
+  if (!bookId) return base;
+
+  const book = BookLoader.getCurrentBook();
+  const extra = book?.manifest?.extraFonts ?? [];
+
+  if (extra.length === 0) return base;
+
+  return {
+    "google-fonts": [...extra, ...base["google-fonts"]]
+  };
 }
 
 async function setFont(fontId, bookId = null) {
@@ -12,7 +23,7 @@ async function setFont(fontId, bookId = null) {
     fontId = resolveFont(bookId);
   }
 
-  const data = await getFontsList();
+  const data = await getFontsList(bookId);
   const font = data["google-fonts"].find(f => f.id === fontId);
 
   if (!font) return;
@@ -28,15 +39,15 @@ async function setFont(fontId, bookId = null) {
       bookState.font = fontId;
       state.save();
     }
-    else{
+    else {
+      throw new Error("setFont: " + t("error.bookNotFound", { bookId }));
+    }
+  }
+  else {
     if (state.currentView === "library") {
       document.body.style.fontFamily = `"${font.name}", serif`;
     }
 
-      throw new Error("getFontsList: " + t("error.bookNotFound", { bookId }));
-    }
-  }
-  else {
     state.uiFont = fontId;
     state.save();
   }
@@ -65,8 +76,8 @@ export function resolveFont(bookId = null) {
   return font;
 }
 
-async function loadGoogleFonts() {
-  const data = await getFontsList();
+async function loadGoogleFonts(bookId = null) {
+  const data = await getFontsList(bookId);
   const fonts = data["google-fonts"];
 
   if (!fonts || fonts.length === 0) return;

@@ -1,11 +1,19 @@
 import state from "../core/state.js";
+import { DiceAnimator } from "./diceAnimator.js";
+import { MessageAnimator } from "./messageAnimator.js";
 import { BookLoader } from "../data/bookLoader.js";
-import { loadUILanguage, loadAvailableUILanguages, loadBookLanguage, t, tb } from "../i18n.js";
+import { loadUILanguage, loadAvailableUILanguages, t } from "../i18n/globalI18n.js";
+import { loadBookLanguage, tb } from "../i18n/bookI18n.js";
 import { Reader } from "../core/reader.js";
-import { ThemeManager } from "../themeManager.js";
-import { FontManager } from "../fontManager.js";
+import { ThemeManager } from "./themeManager.js";
+import { FontManager } from "./fontManager.js";
 import { DialogManager } from "./dialogManager.js";
 import { ActionResolver } from "../flow/actionResolver.js";
+import { CombatEngine } from "../combat/combatEngine.js";
+import { CombatModal } from "./combatModal.js";
+import { interpolateBook, safeT } from "../utils/i18nUtils.js";
+import { DebugPanel } from "./debugPanel.js";
+import { SheetModal } from "./sheetModal.js";
 
 // ---------- UI ----------
 
@@ -140,6 +148,7 @@ async function openLibrary() {
   if((state.currentView !== "library")) {
     BookLoader.resetLibraryCache();
     BookLoader.resetBooksLanguageCache();
+    BookLoader.unloadBookCSS();
 
     state.lastBookId = state.currentBookId;
     state.currentBookId = null;
@@ -175,6 +184,7 @@ function renderLibrary(books, localized) {
 
     card.querySelector("button").onclick = async () => {
       await BookLoader.loadBook(book.id);
+      BookLoader.loadBookCSS(book.id);
       openBookHome();
     };
 
@@ -193,6 +203,7 @@ async function openBookHome() {
   }
 
   await loadBookLanguage(bookId, state.bookState[bookId].settings.language);
+  await FontManager.loadGoogleFonts(bookId);  
 
   const localized = await BookLoader.loadBookLocalizedData(bookId);
   const bookHomeConfig = await BookLoader.getBookHomeConfig(bookId);  
@@ -246,7 +257,7 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
 
   if (!bookHomeConfig.showSummary)
   {
-    document.getElementById("book-title").style.display = "none";
+    document.getElementById("book-summary-text").style.display = "none";
   }
 
   if (!bookHomeConfig.showTitle  && !bookHomeConfig.showSummary)
@@ -354,53 +365,151 @@ async function setBookLanguage(bookId, language) {
   renderReader(bookState.progress.currentChapterId);
 }
 
+function _showGameOverScreen(readerEl, bookId) {
+  readerEl.innerHTML = "";
+
+  const wrap = document.createElement("div");
+  wrap.className = "game-over-screen";
+
+  const title = document.createElement("h2");
+  title.className = "game-over-title";
+  title.textContent = safeT("gameover.title") ?? "Game Over";
+  wrap.appendChild(title);
+
+  const sub = document.createElement("p");
+  sub.className = "game-over-subtitle";
+  sub.textContent = safeT("gameover.subtitle") ?? "O que deseja fazer?";
+  wrap.appendChild(sub);
+
+  // Option 1: Restart
+  const restartBtn = document.createElement("button");
+  restartBtn.className = "game-over-btn";
+  restartBtn.textContent = safeT("gameover.restart") ?? "Reiniciar do início";
+  restartBtn.onclick = async () => {
+    const { initBookState } = await import("../data/bookLoader.js");
+    await initBookState(bookId);
+    const newChapter = Reader.startStory();
+    renderReader(newChapter.id);
+  };
+  wrap.appendChild(restartBtn);
+
+  // Option 2: Replay (placeholder until replay system is built)
+  const replayBtn = document.createElement("button");
+  replayBtn.className = "game-over-btn game-over-btn--secondary";
+  replayBtn.textContent = safeT("gameover.replay") ?? "Voltar jogadas";
+  replayBtn.onclick = () => {
+    // TODO: open replay control panel
+    console.info("[Gaboma] Replay system not yet implemented.");
+  };
+  wrap.appendChild(replayBtn);
+
+  readerEl.appendChild(wrap);
+}
+
 export function renderReader(chapterId) {
-  
- const readerEl = prepareView("reader");
+
+  const readerEl = prepareView("reader");
   if (!readerEl) {
     throw new Error("renderReader: " + t("error.elementNotFound", { element: "#reader" }));
   }
 
   const bookId = state.currentBookId;
-
   applyBookVisualIdentity(bookId);
 
-  const chapter = Reader.getCurrentChapter();
-
-  chapter.text.forEach(paragraph => {
-    const p = document.createElement("p");
-    p.textContent = tb(paragraph);
-    readerEl.appendChild(p);
-  });
-
-  if (!chapter.choices || chapter.choices.length === 0) {
-    const endBtn = document.createElement("button");
-    endBtn.textContent = tb("book.restart");
-    endBtn.onclick = () => {
-      const newChapter = Reader.startStory();
-      renderReader(newChapter);
-    };
-
-    readerEl.appendChild(endBtn);
+  // ── GameOver check — intercept before any rendering ──────────────
+  if (state.bookState[bookId]?.progress?.gameOver) {
+    _showGameOverScreen(readerEl, bookId);
     return;
   }
 
   const resolved = Reader.goToChapter(chapterId);
-  const choices = resolved.choices;
+  const chapter = Reader.getCurrentChapter();
 
-  // Choices
-  choices.forEach(choice => {
+    // ── Chapter image (shown after text/narrative, before buttons) ──────
+  if (chapter.image) {
+    const bookLoader = window._gaboma?.BookLoader;
+    const bookPath   = bookLoader?.getBookPath?.(bookId) ?? `books/${bookId}`;
+    const wrap = document.createElement("div");
+    wrap.className = "chapter-image-wrap";
+    const img = document.createElement("img");
+    img.className = "chapter-image";
+    img.src = `${bookPath}/${chapter.image}`;
+    img.alt = "";
+    wrap.appendChild(img);
+    readerEl.appendChild(wrap);
+  }
+
+  // ── Chapter text ──────────────────────────────────────────────────
+  chapter.text.forEach(key => {
+    const p = document.createElement("p");
+    p.textContent = interpolateBook(key);
+    readerEl.appendChild(p);
+  });
+
+  // ── Active combat: always checked first — overrides choices/end state ──
+  const activeCombats = CombatEngine.getActiveCombatsForChapter(chapterId ?? chapter.id);
+
+  if (activeCombats.length > 0) {
+    CombatModal.open({
+      combats: activeCombats,
+      chapterId: chapterId ?? chapter.id,
+      onClose: () => renderReader(state.bookState[bookId].progress.currentChapterId)
+    });
+    return;
+  }
+
+  // ── End of book (no choices) — render restart button, skip narratives ──
+  if (!resolved.choices || resolved.choices.length === 0) {
+    const endBtn = document.createElement("button");
+    endBtn.textContent = tb("book.restart");
+    endBtn.onclick = () => {
+      const newChapter = Reader.startStory();
+      renderReader(newChapter.id);
+    };
+    readerEl.appendChild(endBtn);
+    return;
+  }
+
+  // ── narrativeTexts: per-choice context lines shown above buttons ──
+  if (resolved.narrativeTexts?.length) {
+    const ntWrap = document.createElement("div");
+    ntWrap.className = "narrative-texts";
+    resolved.narrativeTexts.forEach(text => {
+      const p = document.createElement("p");
+      p.className = "narrative-text";
+      p.textContent = text; // already resolved by chapterResolver
+      ntWrap.appendChild(p);
+    });
+    readerEl.appendChild(ntWrap);
+  }
+
+  // ── Normal choices ────────────────────────────────────────────────
+  const choicesWrap = document.createElement("div");
+  choicesWrap.className = "choices";
+
+  resolved.choices.forEach(choice => {
     const btn = document.createElement("button");
-    btn.textContent = tb(choice.text);""
+    btn.className = "choice-btn";
+    btn.textContent = tb(choice.text);
 
-    btn.onclick = () => {
-      const nextChapter = ActionResolver.handleChoiceClick(choice);
-     
-      renderReader(nextChapter.id);
+    btn.onclick = async () => {
+      // Disable all buttons immediately — re-enabled only after full queue
+      choicesWrap.querySelectorAll("button").forEach(b => b.disabled = true);
+
+      // Blur reader content while events play (dice animation, messages)
+      readerEl.classList.add("processing");
+
+      const nextResolved = await ActionResolver.handleChoiceClick(choice);
+
+      readerEl.classList.remove("processing");
+
+      renderReader(nextResolved?.id ?? null);
     };
 
-    readerEl.appendChild(btn);
+    choicesWrap.appendChild(btn);
   });
+
+  readerEl.appendChild(choicesWrap);
 }
 
 // ---------- Button bar ----------
@@ -427,6 +536,7 @@ function renderBottomBar() {
   if (state.currentView === "reader") {
     setBottomBar([
       { id: "home", label: t("ui.bookHome"), onClick: openBookHome },
+      { id: "sheet", label: t("ui.sheet"), onClick: () => SheetModal.openFull() },
       { id: "library", label: t("ui.library"), onClick: openLibrary },
       { id: "config", label: t("ui.settings"), onClick: openSettingsPopup }
     ]);
@@ -643,7 +753,7 @@ async function bindBookThemeSelector(selectEl) {
   const bookId = state.currentBookId;
   const bookState = state.bookState[bookId];  
 
-  const themes = ThemeManager.getThemesList();
+  const themes = ThemeManager.getThemesList(bookId);
   
   selectEl.innerHTML = "";
 
@@ -697,7 +807,7 @@ async function bindBookFontSelector(selectEl) {
   const bookId = state.currentBookId;
   const bookState = state.bookState[bookId];    
 
-  const data = await FontManager.getFontsList();
+  const data = await FontManager.getFontsList(bookId);
   
   selectEl.innerHTML = "";
 
@@ -868,38 +978,88 @@ function bindProgressButtons() {
 // ---------- UI Events ----------
 
 let eventQueue = [];
+let _queueResolve = null;   // resolves when queue drains
 
+/**
+ * Enqueues visual events and returns a Promise that resolves
+ * when ALL events in this batch (and any already queued) have played.
+ * @param {Array} events
+ * @returns {Promise<void>}
+ */
 export function enqueueEvents(events) {
-  eventQueue.push(...events);
-  processNextEvent();
+  if (!events || events.length === 0) return Promise.resolve();
+
+  return new Promise(resolve => {
+    // Chain: if a previous drain-promise exists, resolve after it
+    const prev = _queueResolve;
+    _queueResolve = resolve;
+
+    eventQueue.push(...events);
+
+    // Only kick off processing if we were idle
+    if (eventQueue.length === events.length && !prev) {
+      processNextEvent();
+    }
+  });
 }
 
 function processNextEvent() {
-  if (!eventQueue.length) return;
+  if (eventQueue.length === 0) return;
 
   const event = eventQueue.shift();
+  let eventPromise;
 
   switch (event.type) {
+
     case "dice":
-      showDiceAnimation(event);
+      // Roll animation, then show result as message
+      eventPromise = DiceAnimator.playDiceAnimation(event)
+        .then(() => {
+          const label = event.results.length > 1
+            ? event.results.join(" + ") + " = " + event.total
+            : String(event.total);
+          return MessageAnimator.showMessage(label);
+        });
       break;
 
     case "message":
-      if (varConfig.visualFeedback && delta !== 0) {
-        showMessage(event.text);
-      }
+      if (!event.text) { eventPromise = Promise.resolve(); break; }
+      eventPromise = MessageAnimator.showMessage(event.text);
       break;
 
     case "animation":
-      playAnimation(event.id);
+      eventPromise = playAnimation(event.id);
       break;
 
     case "sound":
-      playSound(event.id);
-      break;      
+      eventPromise = playSound(event.id);
+      break;
+
+    default:
+      eventPromise = Promise.resolve();
   }
 
-  setTimeout(processNextEvent, 500);
+  (eventPromise ?? Promise.resolve()).then(() => {
+    if (eventQueue.length === 0 && _queueResolve) {
+      const res = _queueResolve;
+      _queueResolve = null;
+      res();
+    } else {
+      processNextEvent();
+    }
+  });
+}
+
+function playAnimation(id) {
+  // TODO: implement named animations (enter_combat, exit_combat, etc.)
+  console.debug(`[animation] ${id}`);
+  return Promise.resolve();
+}
+
+function playSound(id) {
+  // TODO: implement audio system
+  console.debug(`[sound] ${id}`);
+  return Promise.resolve();
 }
 
 function registerVisualEvent(event) {
@@ -929,6 +1089,8 @@ async function init() {
   await openLibrary();
 
   renderBottomBar();
+
+  DebugPanel.initDebugPanel();  
 }
 
 export const UIManager = {

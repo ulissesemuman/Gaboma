@@ -1,0 +1,50 @@
+{
+  "enemies": {
+    "shadow_crawler": {
+      "label": "enemy.shadow_crawler",
+      "description": "enemy.description.shadow_crawler",
+      "hp": 15,
+      "actions": [
+        {
+          "id": "void_bite",
+          "label": "enemy.action.void_bite",
+          "weight": 60,
+          "effects": [
+            { "type": "addVar", "id": "hp", "value": -3 }
+          ],
+          "startMessage": "enemy.action.void_bite.msg.start",
+          "endMessage": "enemy.action.void_bite.msg.end",
+          "actionMessage": "enemy.shadow_crawler.action.void_bite.message"
+        },
+        {
+          "id": "whisper",
+          "label": "enemy.action.whisper",
+          "weight": 40,
+          "effects": [
+            { "type": "addVar", "id": "sanity", "value": -2 }
+          ],
+          "startMessage": "enemy.action.whisper.msg.start",
+          "endMessage": "enemy.action.whisper.msg.end"
+        }
+      ],
+      "onVictory": {
+        "startMessage": "msg.victory.start",
+        "next": null,
+        "effects": [
+          { "type": "addItem", "id": "void_fragment", "value": 1 }
+        ],
+        "endMessage": "msg.victory.end"
+      },
+      "onDefeat": {
+        "next": "game_over",
+        "effects": []
+      } 
+    }
+  },
+  "enemyInstances": {
+    "first_crawler": {
+      "type": "shadow_crawler",
+      "respawn": "if_fled"
+    }
+  }
+}

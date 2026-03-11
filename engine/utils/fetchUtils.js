@@ -1,4 +1,4 @@
-import { t } from "../i18n.js";
+import { t } from "../i18n/globalI18n.js";
 
 async function fetchJSON(path) {
   const res = await fetch(path);

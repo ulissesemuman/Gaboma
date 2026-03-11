@@ -1,0 +1,102 @@
+/* ══════════════════════════════════════════════════════════════════
+   feedback.css — chapter feedback bar and floating message
+                  animations (messageAnimator)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Chapter feedback (static bar) ─────────────────────────────── */
+#chapter-feedback {
+  margin-top: 1rem;
+}
+
+.chapter-feedback-message {
+  padding: 8px 12px;
+  margin-top: 6px;
+  background: rgba(0,0,0,0.1);
+  border-left: 4px solid #999;
+  animation: fadeIn 0.2s ease;
+}
+
+.chapter-feedback-message.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Floating feedback messages (messageAnimator) ───────────────── */
+.feedback-message {
+  position: fixed;
+  z-index: 900;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 80vw;
+  white-space: normal;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  pointer-events: none;
+  background: var(--color-primary, #5a3e28);
+  color: var(--color-surface, #f5f0e8);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.28);
+}
+
+/* ── Explosion style ────────────────────────────────────────────── */
+@keyframes msg-explode-in {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.3);  }
+  60%  { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1);    }
+}
+
+@keyframes msg-explode-out {
+  0%   { opacity: 1; transform: translateX(-50%) scale(1);   }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.4); }
+}
+
+.feedback-message.style-explosion {
+  top: 42%;
+}
+
+.feedback-message.style-explosion.phase-in {
+  animation: msg-explode-in 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+.feedback-message.style-explosion.phase-out {
+  animation: msg-explode-out 0.35s ease-in forwards;
+}
+
+/* ── Slide style ────────────────────────────────────────────────── */
+/*
+ * Sits at bottom: --msg-rest (set by JS). Animates from below viewport
+ * up to resting position with a small bounce; slides back down on exit.
+ */
+.feedback-message.style-slide {
+  bottom: var(--msg-rest, 88px);
+  opacity: 0;
+}
+
+@keyframes msg-slide-in {
+  0%   { opacity: 0; bottom: -80px;                              }
+  55%  { opacity: 1; bottom: calc(var(--msg-rest, 88px) + 14px); }
+  72%  { opacity: 1; bottom: calc(var(--msg-rest, 88px) - 6px);  }
+  85%  { opacity: 1; bottom: calc(var(--msg-rest, 88px) + 4px);  }
+  100% { opacity: 1; bottom: var(--msg-rest, 88px);              }
+}
+
+@keyframes msg-slide-out {
+  0%   { opacity: 1; bottom: var(--msg-rest, 88px); }
+  100% { opacity: 0; bottom: -80px;                 }
+}
+
+.feedback-message.style-slide.phase-in {
+  animation: msg-slide-in 0.52s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.feedback-message.style-slide.phase-out {
+  animation: msg-slide-out 0.48s cubic-bezier(0.55,0,1,0.45) forwards;
+}

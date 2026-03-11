@@ -13,7 +13,10 @@ export function evaluate(expr, context = {}, options = {}) {
   // ==============================
 
   if (expr.var) {
-    return context.variables?.[expr.var] ?? 0;
+    const val = context.variables?.[expr.var];
+    // Boolean variables return as-is for condition checks
+    // Undefined variables default to 0 for numeric operations
+    return val !== undefined ? val : 0;
   }
 
   if (expr.turn !== undefined) {

@@ -1,0 +1,341 @@
+{
+  "startChapterId": "the_archive",
+  "chapters": {
+    "the_archive": {
+      "text": ["chapter.archive.text_1"],
+      "image": "assets/chapter/sunny_archive.png",
+      "choices": [
+        {
+          "text": "chapter.archive.choice.study",
+          "next": "the_discovery",
+          "effects": [
+            { "type": "addItem", "id": "old_journal", "value": 1 }
+          ]
+        }
+      ]
+    },
+    "the_discovery": {
+      "text": ["chapter.discovery.text_1"],
+      "choices": [
+      {
+        "text": "chapter.discovery.choice.follow_map",
+        "next": "the_village_farewell",
+        "startMessage": "chapter.discovery.msg.depart"
+      }
+      ]
+    },    
+    "the_village_farewell": {
+      "text": [
+        "chapter.farewell.text_1",
+        "chapter.farewell.text_2"
+      ],
+      "image": "assets/chapter/village_farewell.png",
+      "choices": [
+        {
+          "text": "chapter.farewell.choice.letter",
+          "next": "awakening",
+          "startMessage": "chapter.farewell.msg.letter",
+          "effects": [
+            { "type": "addVar", "id": "sanity", "value": 3 }
+          ]
+        },
+        {
+          "text": "chapter.farewell.choice.silence",
+          "next": "awakening",
+          "startMessage": "chapter.farewell.msg.silence",
+          "effects": [
+            { "type": "addVar", "id": "hp", "value": 3 }
+          ]
+        }
+      ]
+    },    
+    "awakening": {
+      "text": [
+        "chapter.awakening.text_1",
+        "chapter.awakening.text_2"
+      ],
+      "choices": [
+        {
+          "text": "chapter.awakening.choice.altar",
+          "next": "altar_room"
+        },
+        {
+          "text": "chapter.awakening.choice.corridor",
+          "next": "whispering_corridor"
+        }
+      ]
+    },
+    "altar_room": {
+      "text": [ "chapter.altar.text_1" ],
+      "choices": [
+        {
+          "text": "chapter.altar.choice.touch",
+          "attempt": {
+            "effects": [
+              { "type": "addVar", "id": "essence", "value": { "dice": { "count": 1, "sides": 6 } } }
+            ],
+            "success": {
+              "conditions": { "variables": { "essence": { "gte": 4 } } },
+              "next": "awakening",
+              "startMessage": "chapter.altar.success",
+              "effects": [ { "type": "setVar", "id": "altar_activated", "value": true } ]
+            },
+            "failure": {
+              "effects": [ { "type": "addVar", "id": "sanity", "value": -3 } ],
+              "endMessage": "chapter.altar.failure"
+            }
+          }
+        }
+      ]
+    },
+    "whispering_corridor": {
+      "text": [ "chapter.corridor.text_1" ],
+      "onEnter": {
+        "effects": [
+          { "type": "startCombat", "instanceId": "first_crawler" }
+        ]
+      },
+      "choices": [
+        { 
+          "text": "chapter.corridor.choice.proceed", 
+          "next": "hall_of_echoes",
+          "conditions": { "hasItem": "void_fragment" }
+        },
+        { "text": "chapter.corridor.choice.back", "next": "awakening" }
+      ]
+    },
+    "hall_of_echoes": {
+      "text": ["chapter.echoes.text_1"],
+      "image": "assets/chapter/vision_of_ruin.png",
+      "onEnter": {
+        "startMessage": "O Vazio te mostra uma visão do futuro."
+      },
+      "choices": [
+        {
+          "text": "choice.echoes.accept_burden",
+          "next": "guardians_sanctuary",
+          "effects": [
+            { "type": "addVar", "id": "sanity", "value": -2 }
+          ]
+        }
+      ]
+    },
+    "guardians_sanctuary": {
+      "text": [ "chapter.guardian.text_1" ],
+      "image": "assets/chapter/spectre_of_valoria.png",
+      "onEnter": {
+        "startMessage": "Uma presença milenar se materializa no altar."
+      },
+      "choices": [
+        {
+          "text": "choice.guardian.ask_about_blood",
+          "next": "guardians_sanctuary_dialog",
+          "conditions": { "hasItem": "old_journal" }
+        },
+        {
+          "text": "choice.guardian.proceed_to_bazaar",
+          "next": "soul_bazaar"
+        }
+      ]
+    },
+    "guardians_sanctuary_dialog": {
+      "text": [ "chapter.guardian.text_2" ],
+      "image": "assets/chapter/spectre_of_valoria.png",
+      "choices": [
+        {
+          "text": "choice.guardian.accept_fate",
+          "next": "obsidian_bridge",
+          "effects": [
+            { "type": "setVar", "id": "sanity", "value": 15 },
+            { "type": "addItem", "id": "guardians_blessing", "value": 1 }
+          ],
+          "startMessage": "Você sente o peso da responsabilidade, mas também uma calma força mental."
+        }
+      ]
+    },
+    "obsidian_bridge": {
+      "text": [ "chapter.trap.text_1" ],
+      "image": "assets/chapter/void_blades.png",
+      "choices": [
+        {
+          "text": "choice.trap.use_blessing",
+          "conditions": { "variables": { "guardians_blessing_active": { "eq": true } } },
+          "next": "deserters_camp",
+          "startMessage": "A marca em seu pulso brilha e as lâminas se dissolvem ao seu toque."
+        },
+        {
+          "text": "choice.trap.dodge",
+          "attempt": {
+            "effects": [
+              {
+                "type": "setVar",
+                "id": "_temp_roll",
+                "value": { "add": [ { "var": "agility" }, { "dice": { "count": 1, "sides": 20 } } ] }
+              }
+            ],
+            "success": {
+              "conditions": { "variables": { "_temp_roll": { "gte": 10 } } },
+              "next": "deserters_camp",
+              "startMessage": "msg.trap.success"
+            },
+            "failure": {
+              "next": "deserters_camp",
+              "effects": [ { "type": "addVar", "id": "hp", "value": -8 } ],
+              "startMessage": "msg.trap.failure"
+            }
+          }
+        }
+      ]
+    },
+    "deserters_camp": {
+      "text": [ "chapter.deserters.text_1" ],
+      "image": "assets/chapter/deserters_camp.png",
+      "choices": [
+        {
+          "text": "choice.deserters.give_essence",
+          "conditions": { "variables": { "essence": { "gte": 2 } } },
+          "effects": [
+            { "type": "addVar", "id": "essence", "value": -2 },
+            { "type": "setVar", "id": "helped_deserter", "value": true },
+            { "type": "addItem", "id": "void_rations", "value": 1 }
+          ],
+          "next": "soul_bazaar",
+          "startMessage": "chapter.deserters.msg.gratitude"
+        },
+        {
+          "text": "choice.deserters.ignore",
+          "next": "soul_bazaar"
+        }
+      ]
+    },
+    "soul_bazaar": {
+      "text": [ "chapter.bazaar.text_1" ],
+      "image": "assets/chapter/soul_bazaar.jpg",
+      "onFirstEnter": {
+        "startMessage": "chapter.bazaar.msg.welcome"
+      },
+      "choices": [
+        {
+          "text": "chapter.bazaar.choice.buy_talisman",
+          "conditions": { "variables": { "essence": { "gte": 5 } } },
+          "effects": [
+            { "type": "addVar", "id": "essence", "value": -5 },
+            { "type": "addItem", "id": "void_talisman", "value": 1 }
+          ],
+          "next": "soul_bazaar",
+          "startMessage": "chapter.bazaar.msg.buy_success"
+        },
+        {
+          "text": "chapter.bazaar.choice.solve_enigma",
+          "conditions": { "variables": { "enigma_solved": { "eq": false } } },
+          "attempt": {
+            "startMessage": "chapter.bazaar.msg.enigma_start",
+            "effects": [
+              { 
+                "type": "addVar", 
+                "id": "_temp_roll", 
+                "value": { "add": [ { "var": "sanity" }, { "dice": { "count": 1, "sides": 20 } } ] } 
+              }
+            ],
+            "success": {
+              "conditions": { "variables": { "_temp_roll": { "gte": 25 } } },
+              "effects": [
+                { "type": "setVar", "id": "enigma_solved", "value": true },
+                { "type": "addItem", "id": "essence_potion", "value": 2 }
+              ],
+              "next": "soul_bazaar",
+              "startMessage": "chapter.bazaar.msg.enigma_success"
+            },
+            "failure": {
+              "effects": [ { "type": "addVar", "id": "sanity", "value": -4 } ],
+              "endMessage": "chapter.bazaar.msg.enigma_failure"
+            }
+          }
+        },
+        { "text": "chapter.bazaar.choice.proceed", "next": "confluence_chamber" }
+      ]
+    },
+    "confluence_chamber": {
+      "text": ["chapter.chamber.text_1"],
+      "onEnter": {
+        "conditions": { "variables": { "altar_activated": { "eq": false } } },
+        "startMessage": "chapter.chamber.msg.dissonance"
+      },
+      "choices": [
+        {
+          "text": "chapter.chamber.choice.use_fragment",
+          "conditions": { "hasItem": "void_fragment" },
+          "attempt": {
+            "startMessage": "chapter.chamber.msg.attempt_start",
+            "effects": [
+              { "type": "useItem", "id": "void_fragment", "value": 1 }
+            ],
+            "success": {
+              "conditions": { 
+                "all": [
+                  { "variables": { "altar_activated": { "eq": true } } },
+                  { "variables": { "sanity": { "gte": 10 } } }
+                ]
+              },
+              "next": "beyond_the_void",
+              "startMessage": "chapter.chamber.msg.success"
+            },
+            "failure": {
+              "effects": [
+                { "type": "addVar", "id": "hp", "value": -5 },
+                { "type": "addVar", "id": "sanity", "value": -5 }
+              ],
+              "endMessage": "chapter.chamber.msg.failure"
+            }
+          }
+        },
+        {
+          "text": "chapter.chamber.choice.back",
+          "next": "soul_bazaar"
+        }
+      ]
+    },
+    "beyond_the_void": {
+      "text": [ "chapter.beyond.text_1" ],
+      "image": "assets/chapter/event_horizon.png",
+      "onEnter": {
+        "startMessage": "Sua jornada física termina, mas a ascensão começa."
+      },
+      "choices": [
+        {
+          "text": "choice.ending.ascension",
+          "next": "ending_ascension",
+          "conditions": { "variables": { "sanity": { "gte": 15 } } }
+        },
+        {
+          "text": "choice.ending.sacrifice",
+          "next": "ending_sacrifice"
+        }
+      ]
+    },
+    "ending_ascension": {
+      "text": [ "chapter.ending.ascension.text" ],
+      "image": "assets/chapter/ascension_light.png",
+      "onEnter": {
+        "effects": [ { "type": "setVar", "id": "sanity", "value": 100 } ],
+        "startMessage": "A mente expande além da carne."
+      }
+    },
+    "ending_sacrifice": {
+      "text": [ "chapter.ending.sacrifice.text" ],
+      "image": "assets/chapter/void_shattering.png",
+      "onEnter": {
+        "startMessage": "msg.sacrifice.start",
+        "effects": [
+          { "type": "setVar", "id": "hp", "value": 0 }
+        ]
+      },
+      "choices": [
+        {
+          "text": "choice.game.finish",
+          "next": "credits"
+        }
+      ]
+    }
+  }
+}

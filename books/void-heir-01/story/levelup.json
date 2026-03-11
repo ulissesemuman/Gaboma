@@ -1,0 +1,24 @@
+{
+  "levels": [
+    {
+      "level": 2,
+      "xpRequired": 100,
+      "label": "Aprendiz",
+      "effects": [
+        { "type": "addVarMax", "id": "hp", "value": 5 },
+        { "type": "addVar",    "id": "hp", "value": 5 },
+        { "type": "addVar",    "id": "attack", "value": 1 }
+      ]
+    },
+    {
+      "level": 3,
+      "xpRequired": 250,
+      "label": "Veterano",
+      "effects": [
+        { "type": "addVarMax", "id": "hp", "value": 10 },
+        { "type": "addVar",    "id": "hp", "value": 10 },
+        { "type": "addVar",    "id": "attack", "value": 2 }
+      ]
+    }
+  ]
+}

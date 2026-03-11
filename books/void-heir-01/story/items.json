@@ -1,0 +1,81 @@
+{
+  "categories": {
+    "tool": {
+      "label": "cat.tool",
+      "type": "default",
+      "stackable": "per-item"
+    },
+    "consumable": {
+      "label": "cat.consumable",
+      "type": "consumable",
+      "stackable": true
+    },
+    "relic": {
+      "label": "cat.relic",
+      "type": "default",
+      "description": "Itens passivos que não precisam ser equipados"
+    },
+    "equipment": {
+      "label": "cat.equipment",
+      "type": "equippable"
+    }
+  },
+  "items": {
+    "void_fragment": {
+      "label": "item.void_fragment",
+      "category": "tool",
+      "description": "item.void_fragment.desc",
+      "icon": "fragment.svg",
+      "flags": ["stackable"],
+      "weight": 1.0
+    },
+    "old_journal": {
+      "label": "item.old_journal",
+      "category": "tool",
+      "description": "item.old_journal.desc",
+      "weight": 0.2,
+      "flags": ["noDrop"]
+    },
+    "essence_potion": {
+      "label": "item.essence_potion",
+      "category": "consumable",
+      "description": "item.essence_potion.desc",
+      "weight": 0.1,
+      "onConsume": {
+        "effects": [ { "type": "addVar", "id": "essence", "value": 3 } ]
+      }
+    },
+    "void_rations": {
+      "label": "item.void_rations",
+      "category": "consumable",
+      "description": "item.void_rations.desc",
+      "weight": 0.3,
+      "onConsume": {
+        "effects": [ { "type": "addVar", "id": "hp", "value": 10 } ]
+      }
+    },
+    "void_talisman": {
+      "label": "item.void_talisman",
+      "category": "relic",
+      "description": "item.void_talisman.desc",
+      "weight": 0.5,
+      "flags": ["noDrop"],
+      "onAcquire": {
+        "effects": [ { "type": "addVar", "id": "sanity", "value": 5 } ]
+      }
+    },
+    "guardians_blessing": {
+      "label": "item.guardians_blessing",
+      "category": "relic",
+      "description": "item.guardians_blessing.desc",
+      "weight": 0.0,
+      "flags": ["noDrop"],
+      "onAcquire": {
+        "effects": [
+          { "type": "setVar", "id": "guardians_blessing_active", "value": true },
+          { "type": "addVarMax", "id": "hp", "value": 5 }
+        ]
+      }
+    }
+  }
+}

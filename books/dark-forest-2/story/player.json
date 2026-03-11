@@ -1,0 +1,33 @@
+{
+  "_playerHpVar": "hp",
+
+  "actions": [
+    {
+      "id": "attack",
+      "label": "player.action.attack",
+      "retaliation": true,
+      "conditions": null,
+      "effects": [
+        { "type": "addVar", "id": "_enemyHp", "value": { "multiply": [-1, { "dice": { "count": 1, "sides": 6 } }] } }
+      ]
+    },
+    {
+      "id": "use_potion",
+      "label": "player.action.usePotion",
+      "retaliation": true,
+      "conditions": { "gt": [{ "itemCount": "potion" }, 0] },
+      "effects": [
+        { "type": "useItem", "id": "potion", "value": 1 },
+        { "type": "addVar", "id": "hp", "value": 4 }
+      ]
+    },
+    {
+      "id": "flee",
+      "label": "player.action.flee",
+      "retaliation": false,
+      "conditions": null,
+      "effects": [],
+      "endsCombat": "fled_player"
+    }
+  ]
+}

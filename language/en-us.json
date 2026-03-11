@@ -37,5 +37,18 @@
   "error.viewNotFound": "View '{view}' not found in DOM.",
   "error.elementNotFound": "Element {element} not found.",
   "error.invalidBook": "Current book is null or undefined.",
-  "error.noAvailableUILanguages": "No available UI languages."
+  "error.noAvailableUILanguages": "No available UI languages.",
+  "sheet.title": "Character Sheet",
+  "sheet.itemsTitle": "Inventory",
+  "sheet.inventory": "Inventory",
+  "sheet.equipped": "Equipped",
+  "sheet.emptyInventory": "No items in inventory.",
+  "sheet.noVars": "",
+  "sheet.action.use": "Use",
+  "sheet.action.equip": "Equip",
+  "sheet.action.unequip": "Unequip",
+  "sheet.action.drop": "Drop",
+  "sheet.action.sell": "Sell",
+  "shop.insufficientFunds": "Not enough gold.",
+  "ui.sheet": "Character Sheet"
 }

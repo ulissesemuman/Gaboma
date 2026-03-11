@@ -1,0 +1,132 @@
+{
+  "title": "O Herdeiro do Vazio",
+  "summary": "A escuridão não é apenas a ausência de luz; é uma presença que observa.",
+  "book.restart": "Voltar ao início",
+  "var.hp": "Vitalidade",
+  "var.essence": "Essência Etérea",
+  "var.sanity": "Sanidade",
+
+  "chapter.archive.text_1": "O sol da tarde entra pelas janelas da biblioteca. O cheiro de chá e pergaminho velho é reconfortante. Você é apenas um aprendiz, com uma vida calma e livros para organizar.",
+  "chapter.archive.choice.study": "Estudar o tomo empoeirado no fundo da estante",
+  "chapter.discovery.text_1": "Entre as páginas, você encontra um mapa para a Cripta do Vazio e um aviso: 'Somente o puro de sangue pode selar o que foi aberto'. Uma curiosidade perigosa toma conta de você.",
+  "chapter.discovery.choice.follow_map": "Partir em uma expedição para as montanhas",
+
+  "chapter.echoes.text_1": "As paredes deste salão projetam sombras do mundo exterior. Você vê sua vila sendo consumida por chamas arroxeadas. O Vazio sussurra: 'Se você não se tornar o cadeado, tudo o que você ama será a chave'.",
+  "choice.echoes.accept_burden": "Aceitar o peso da responsabilidade e seguir adiante",
+
+  "chapter.guardian.text_1": "Você entra em uma sala onde a pedra está coberta por runas de proteção, mas todas estão rachadas. No centro, um altar quebrado flutua. Uma figura etérea e translúcida, vestindo armadura de uma era esquecida, te observa.",
+  "chapter.guardian.text_2": "O Guardião sussurra: 'Eu sou Valoria, o último Cadeado. Eu falhei. Eu li o jornal do seu ancestral... você tem o Sangue Puro. O Vazio não quer sua vida, ele quer a sua força como estrutura. Se você não se tornar o Cadeado, a visão do seu mundo queimando será a única realidade.'",
+  "choice.guardian.ask_about_blood": "Perguntar sobre a linhagem mencionada no jornal",
+  "choice.guardian.accept_fate": "Aceitar o seu papel como o Novo Cadeado (Ganha Bônus de Sanidade)",
+  "choice.guardian.proceed_to_bazaar": "Agradecer e seguir para o Bazar",  
+
+  "chapter.awakening.text_1": "Você acorda em uma cripta de obsidiana. O ar vibra com uma energia roxa.",
+  "chapter.awakening.text_2": "Sua vitalidade atual é {hp}. Duas saídas se revelam sob a luz bruxuleante.",
+  "chapter.awakening.choice.altar": "Aproximar-se do Altar de Pulsão",
+  "chapter.awakening.choice.corridor": "Entrar no Corredor Sussurrante",
+  "chapter.altar.text_1": "O Altar exige um tributo de alma. Seus olhos brilham com {essence} de essência.",
+  "chapter.altar.choice.touch": "Tocar a pedra fria",
+  "chapter.altar.success": "O Vazio aceita você. O portal nas profundezas rangeu.",
+  "chapter.altar.failure": "Sua mente fraqueja sob o peso do infinito.",
+  "chapter.corridor.text_1": "O corredor é estreito. Algo se arrasta no teto.",
+  "chapter.corridor.choice.fight": "Enfrentar a sombra",
+  "enemy.shadow_crawler": "Rastejador das Sombras",
+  "item.void_fragment": "Fragmento do Vazio",
+  "item.void_fragment.desc": "Um pedaço de matéria que não deveria existir.",
+  "chapter.corridor.onEnter.start": "As paredes parecem pulsar conforme você avança...",
+  "chapter.corridor.onEnter.end": "O ar se torna pesado.",
+
+  "msg.altar.attempt.start": "Você fecha os olhos e estende as mãos...",
+  "msg.altar.attempt.success": "Uma conexão neural é estabelecida!",
+  "enemy.description.shadow_crawler": "Uma massa amorfa de escuridão com dezenas de pernas finas e dentes que parecem feitos de vidro quebrado. Ela se alimenta do medo e da vitalidade de quem ousa invadir seu domínio.",
+
+  "player.action.strike": "Golpear",
+  "player.action.strike.msg.start": "Você brande sua arma contra a escuridão!",
+  "player.action.strike.msg.end": "O impacto drena {value} de vida da criatura. Vida do inimigo: {_enemyHp}.",
+
+  "player.action.meditate": "Meditar",
+  "player.action.meditate.msg.start": "Você fecha os olhos e busca o centro do seu ser...",
+  "player.action.meditate.msg.end": "Sua Essência aumenta para {essence}. Você recupera um pouco de fôlego.",
+
+  "player.action.flee": "Fugir",
+  "player.action.flee.msg.start": "O pânico toma conta e você corre desesperadamente!",
+
+  "enemy.action.void_bite": "Mordida do Vazio",
+  "enemy.action.void_bite.msg.start": "O Rastejador projeta suas mandíbulas sombrias!",
+  "enemy.action.void_bite.msg.end": "A mordida gélida ignora sua armadura. Você perde {value} de vida.",
+  "enemy.shadow_crawler.action.void_bite.message": "O {enemy} ataca você com {action}!",
+
+  "enemy.action.whisper": "Sussurro do Abismo",
+  "enemy.action.whisper.msg.start": "Vozes de pessoas que você esqueceu ecoam na sua mente...",
+  "enemy.action.whisper.msg.end": "Sua sanidade fraqueja ({sanity}). A realidade parece menos real.",
+
+  "msg.victory.start": "A criatura solta um guincho agudo e se dissolve em poeira estelar...",
+  "msg.victory.end": "Você sobreviveu, mas o Vazio deixou sua marca. Você encontrou um fragmento!",
+
+  "chapter.bazaar.text_1": "Neste canto da cripta, a energia é menos hostil. Um ser etéreo flutua sobre mercadorias estranhas.",
+  "item.void_talisman": "Talismã do Vazio",
+  "item.void_talisman.desc": "Um amuleto que ancora sua mente à realidade.",
+
+  "chapter.bazaar.msg.welcome": "Sinto o cheiro de uma alma nova... deseja negociar?",
+  "chapter.bazaar.choice.buy_talisman": "Comprar Talismã (5 Essências)",
+  "chapter.bazaar.choice.proceed": "Ir para a Câmara de Confluência",
+  "chapter.bazaar.msg.buy_success": "O mercador entrega um amuleto que vibra em sincronia com sua mente.",
+  "chapter.bazaar.choice.solve_enigma": "Decifrar os Símbolos da Parede",
+  "chapter.bazaar.msg.enigma_start": "Você foca sua visão nos glifos mutantes...",
+  "chapter.bazaar.msg.enigma_success": "Os símbolos param de se mexer e revelam um compartimento secreto com poções!",
+  "chapter.bazaar.msg.enigma_failure": "Os glifos queimam sua mente. A dor é insuportável!",
+
+
+  "chapter.chamber.text_1": "Você está diante do Portal do Vazio. A estrutura de pedra flutua sobre um abismo sem fim. O ar cheira a ozônio e memórias perdidas.",
+  "chapter.chamber.choice.use_fragment": "Inserir o Fragmento no Pedestal Central",
+  "chapter.chamber.choice.back": "Voltar para a segurança do Bazar",
+  "chapter.chamber.msg.attempt_start": "Você encaixa o fragmento. A realidade começa a tremer...",
+  "chapter.chamber.msg.success": "As engrenagens do universo se alinham! O caminho para o Alinhamento está aberto.",
+  "chapter.chamber.msg.failure": "Uma explosão de energia bruta te arremessa para trás! O portal rejeita quem não ativou o Altar adequadamente.",
+
+  "chapter.corridor.choice.proceed": "Avançar para o brilho roxo ao fundo",
+  "chapter.corridor.choice.back": "Retornar para a câmara inicial",
+
+  "chapter.beyond.text_1": "Você flutua no nexo de todas as realidades. O tempo não é mais uma linha, mas um oceano. Duas vozes ecoam em sua mente: uma oferece o trono do nada, a outra, o fim do ciclo.",
+  "choice.ending.ascension": "Aceitar o Legado (Exige 15 de Sanidade)",
+  "choice.ending.sacrifice": "Destruir o Portal por Dentro",
+
+  "chapter.ending.ascension.text": "Sua consciência se funde ao Vazio. Você não é mais um homem, mas a própria lei que rege a escuridão. O Herdeiro finalmente assumiu seu lugar. O universo aguarda seu próximo comando.",
+
+  "chapter.ending.sacrifice.text": "Você canaliza toda a Essência acumulada para o núcleo do seu próprio ser. O fragmento em suas mãos vibra até rachar, e com ele, as paredes do Vazio. Você vê o mundo real uma última vez através da fenda — o céu azul, o vento nas árvores — antes que tudo colapse. O Portal se fecha, selado pelo seu sacrifício. O Herdeiro se tornou o Cadeado.",
+  "msg.sacrifice.start": "Sua carne se dissolve em luz para salvar o que resta da realidade.",
+  "choice.game.finish": "Encerrar Crônica",
+
+  "var.label.blessing": "Bênção de Valoria",
+  "item.old_journal": "Diário de Aethelgard",
+  "item.old_journal.desc": "Um caderno de couro gasto com anotações sobre linhagens antigas.",
+  "item.guardians_blessing": "Selo do Guardião",
+  "item.guardians_blessing.desc": "Uma marca etérea no seu pulso que pulsa com proteção divina.",
+  "chapter.trap.text_1": "O caminho se estreita em uma ponte de obsidiana. De repente, lâminas de energia roxa começam a oscilar do teto, rítmicas e letais. O cheiro de ozônio é insuportável.",
+  "choice.trap.dodge": "Tentar atravessar correndo (Teste de Agilidade)",
+  "choice.trap.use_blessing": "Usar a Proteção de Valoria para dissipar as lâminas",
+  "msg.trap.success": "Você atravessa ileso, sentindo o ar frio cortar suas vestes.",
+  "msg.trap.failure": "Uma lâmina te atinge de raspão! A energia do Vazio queima sua pele.",
+
+  "chapter.deserters.text_1": "À beira do caminho, você encontra tendas feitas de farrapos e ossos de criaturas colossais. Figuras encolhidas, cujos olhos brilham com um roxo doentio, imploram por um pouco de essência para acalmar a fome da alma.",
+  "choice.deserters.give_essence": "Dar 2 de Essência para o desertor moribundo",
+  "choice.deserters.ignore": "Seguir adiante sem olhar para trás",
+  "item.void_rations": "Rações do Vazio",
+  "item.void_rations.desc": "Um alimento amargo que recupera 10 de vida, mas deixa um gosto de cinzas.",
+
+  "chapter.discovery.msg.depart": "Você viaja por semanas até as ruínas esquecidas...",
+  "chapter.chamber.msg.dissonance": "O portal emite um zumbido dissonante e doloroso.",
+  "chapter.deserters.msg.gratitude": "O desertor te entrega um pacote seco em gratidão.",
+
+  "chapter.farewell.text_1": "Você passa a noite em claro. O mapa está aberto sobre a mesa, mas seus olhos vagam pela janela — os telhados da vila, a luz amarela saindo das casas, o sino da praça que você ouve desde criança.",
+  "chapter.farewell.text_2": "De manhã, com a bolsa nas costas e o diário na mão, você para na soleira. Ninguém sabe para onde você vai. Talvez seja melhor assim. Ou talvez não.",
+  "chapter.farewell.choice.letter": "Deixar uma carta para quem ficou",
+  "chapter.farewell.choice.silence": "Partir sem dizer nada",
+  "chapter.farewell.msg.letter": "Você escreve às pressas, sem saber se as palavras são suficientes. Mas escrever alivia algo dentro de você.",
+  "chapter.farewell.msg.silence": "Você fecha a porta devagar. O silêncio pesa, mas também endurece. Você vai precisar dessa dureza.",
+
+  "var.agility": "Agilidade",
+
+  "item.essence_potion": "Poção de Essência",
+  "item.essence_potion.desc": "Um frasco translúcido que pulsa com energia etérea concentrada."
+}

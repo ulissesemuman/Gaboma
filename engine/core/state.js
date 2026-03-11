@@ -62,11 +62,15 @@ const state = {
                   },
         progress: {
                   currentChapterId: null,
+                  previousChapterId: null,
                   sequence: 0,
                   turn: 0,
+                  _playerHpVar: null, // used internally by combat engine to track player HP without coupling it to book structure  
                   history: [],
                   variables: {},
                   items: {},
+                  equipped: {},
+                  varMaxOverrides: {},
                   combat: {},
                   //{
                   //    activeEnemyId: null,
@@ -106,6 +110,10 @@ const state = {
       bookState.progress.currentChapterId = data.progress.currentChapterId;
     }
 
+    if (data.progress?.previousChapterId !== undefined) {
+      bookState.progress.previousChapterId = data.progress.previousChapterId;
+    }    
+
     if (data.progress?.sequence !== undefined) {
       bookState.progress.sequence = data.progress.sequence;
     }
@@ -115,7 +123,7 @@ const state = {
     }
 
     if (data.progress?.combat !== undefined) {
-      ObjectUtils.mergeStrict(bookState.progress.combat, data.progress.combat);
+      ObjectUtils.mergeDynamic(bookState.progress.combat, data.progress.combat);
     }
 
     if (data.progress?.variables) {

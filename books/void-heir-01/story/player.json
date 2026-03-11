@@ -1,0 +1,49 @@
+{
+  "_playerHpVar": "hp",
+  "_playerXpVar": "xp",
+  "actions": [
+    {
+      "id": "strike",
+      "label": "player.action.strike",
+      "retaliation": true,
+      "effects": [
+        { "type": "addVar", 
+          "id": "_enemyHp", 
+          "value": { 
+            "multiply": [
+              -1, 
+              { "add": [ { "var": "strength" }, { "dice": { "count": 1, "sides": 4 } } ] }
+            ]
+          } 
+        }
+      ],
+      "startMessage": "player.action.strike.msg.start",
+      "endMessage": "player.action.strike.msg.end"
+    },
+    {
+      "id": "meditate",
+      "label": "player.action.meditate",
+      "retaliation": true,
+      "conditions": { "lt": [{ "var": "essence" }, 10] },
+      "effects": [
+        { "type": "addVar", "id": "essence", "value": 2 },
+        { "type": "addVar", "id": "hp", "value": 1 }
+      ],
+      "startMessage": "player.action.meditate.msg.start",
+      "endMessage": "player.action.meditate.msg.end"
+    },
+    {
+      "id": "flee",
+      "label": "player.action.flee",
+      "retaliation": false,
+      "endsCombat": "fled_player",
+      "startMessage": "player.action.flee.msg.start",
+      "onFlee": {
+        "next_(sample_if_not_use_go_previous)": "tavern",
+        "effects": [
+          { "type": "addVar", "id": "hp", "value": -4 }
+        ]
+      }
+    }
+  ]
+}

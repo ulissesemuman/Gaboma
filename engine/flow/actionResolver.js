@@ -1,124 +1,165 @@
 import state from '../core/state.js';
 import { Effects } from './effects.js';
-import { Conditions } from '../flow/conditions.js';
+import { Conditions } from './conditions.js';
 import { Engine } from '../core/engine.js';
 import { FeedbackResolver } from '../ui/feedbackResolver.js';
 import { History } from './history.js';
-import { tb } from '../i18n.js';
+import { tb } from '../i18n/bookI18n.js';
 import { Reader } from '../core/reader.js';
+import { interpolateBook } from '../utils/i18nUtils.js';
+import { enqueueEvents } from '../ui/uiManager.js';
+import { SheetModal } from '../ui/sheetModal.js';
 
-export function handleChoiceClick(choice) {
-  const bookId = state.currentBookId;
-  const bookState = state.bookState[bookId];
+export async function handleChoiceClick(choice) {
+  const bookId           = state.currentBookId;
+  const bookState        = state.bookState[bookId];
   const currentChapterId = bookState.progress.currentChapterId;
 
-  // 1️⃣ Resolve fluxo da choice
+  // Resolve choice flow (sync — rolls dice, applies effects, evaluates conditions)
   const result = resolveChoice(choice);
 
-  // 4️⃣ Construir events visuais
-  const events =
-    FeedbackResolver.resolveActionEvents(result.diceEvents, result.resolvedEffects);
+  // 2️⃣ Build visual event queue
+  //
+  // Order rules:
+  //   a) diceEvents ALWAYS first — player sees the roll before anything else
+  //   b) startMessage AFTER dice — contextual message follows the roll result
+  //   c) effect messages (varDelta, itemDelta, etc.) in the middle
+  //   d) endMessage LAST — summary/consequence after all effects are shown
+  //
+  const diceEventItems = result.diceEvents.map(e => ({ ...e })); // already { type:"dice", … }
 
-  // 5️⃣ Registrar turno
+  const effectEvents = FeedbackResolver.resolveActionEvents(
+    [],               // dice already separated
+    result.resolvedEffects
+  );
+
+  const startMsg = result.startMessage
+    ? [{ type: "message", text: interpolateBook(result.startMessage) }]
+    : [];
+
+  const endMsg = result.endMessage
+    ? [{ type: "message", text: interpolateBook(result.endMessage) }]
+    : [];
+
+  const events = [
+    ...diceEventItems,
+    ...startMsg,
+    ...effectEvents,
+    ...endMsg
+  ];
+
+  // 3️⃣ Register turn in history
   History.registerStateEvent({
     chapterId: currentChapterId,
-    source: "choice",
-    choiceId: tb(choice.text),
+    source:    "choice",
+    choiceId:  tb(choice.text),
     events,
-    effects: result.resolvedEffects
+    effects:   result.resolvedEffects
   });
 
-  // 6️⃣ Ir para próximo capítulo
+  // Play visual queue — choices are disabled by renderReader before this call
+  await enqueueEvents(events);
+
+
+  // ── Open sheet modal if requested by any resolved effect ─────────
+  const sheetEffect = result.resolvedEffects.find(
+    e => e.type === "showCharacterSheet" || e.type === "showConsumableSelector"
+  );
+
+  if (sheetEffect) {
+    const sheetOpts = {
+      readOnly:     sheetEffect.readOnly     ?? false,
+      allowSelling: sheetEffect.allowSelling ?? sheetEffect.enableTrading ?? false,
+      sellCurrency: sheetEffect.sellCurrency ?? null,
+    };
+
+    await new Promise(resolve => {
+      const opts = { ...sheetOpts, _onClose: resolve };
+      if (sheetEffect.type === "showConsumableSelector") {
+        SheetModal.openConsumables(opts);
+      } else {
+        SheetModal.openFull(opts);
+      }
+    });
+  }
+
+  // Navigate to next chapter (after all feedback finishes)
   return Reader.goToChapter(result.nextChapterId);
 }
 
+// ─── resolveChoice ────────────────────────────────────────────────────────────
 function resolveChoice(choice) {
-  const bookId = state.currentBookId;
-  const bookState = state.bookState[bookId];
-  const progress = bookState.progress;
+  const bookId           = state.currentBookId;
+  const bookState        = state.bookState[bookId];
+  const progress         = bookState.progress;
   const currentChapterId = progress.currentChapterId;
 
   let rawEffects = [];
   let diceEvents = [];
-  let resolved = null;
 
-  if (choice.effects) {
-    rawEffects.push(...choice.effects);
-  }
+  if (choice.effects) rawEffects.push(...choice.effects);
 
+  // ── Simple choice (no attempt) ────────────────────────────────────
   if (!choice.attempt) {
-    // 2️⃣ Resolver effects (AST → delta)
-    const resolved =
-      Effects.resolveActionEffects(rawEffects);
-
-    // 3️⃣ Aplicar effects
+    const resolved = Effects.resolveActionEffects(rawEffects);
     Engine.applyEffects(resolved.effects);
 
     return {
-      nextChapterId: choice.next,
+      nextChapterId:  choice.next,
       resolvedEffects: resolved.effects,
-      diceEvents: resolved.diceEvents
+      diceEvents:      resolved.diceEvents,
+      startMessage:    null,
+      endMessage:      null
     };
   }
 
+  // ── Attempt branch ────────────────────────────────────────────────
   const { effects, success, failure } = choice.attempt;
 
-  if (effects) {
-    rawEffects.push(...effects);
-  }
+  if (effects) rawEffects.push(...effects);
 
-  // 2️⃣ Resolver effects (AST → delta)
-  resolved =
-    Effects.resolveActionEffects(rawEffects);
-
-  // 3️⃣ Aplicar effects
+  // Resolve + apply shared attempt effects (usually the dice roll itself)
+  const resolved = Effects.resolveActionEffects(rawEffects);
   Engine.applyEffects(resolved.effects);
-
   diceEvents.push(...resolved.diceEvents);
 
   const context = {
-    variables: progress.variables,
-    items: progress.items,
-    turn: progress.turn,
+    variables:       progress.variables,
+    items:           progress.items,
+    turn:            progress.turn,
     chaptersVisited: progress.chaptersVisited
   };
 
-  const isSuccess = Conditions.normalizedConditions
-    ? Conditions.evaluate(success?.conditions, context)
-    : false;
+  const isSuccess = Conditions.evaluate(success?.conditions, context) ?? false;
 
-  let resultEffects = [];
-  let message = null;
-  let nextChapterId = currentChapterId;
+  let resultEffects  = [];
+  let startMessage   = null;
+  let endMessage     = null;
+  let nextChapterId  = currentChapterId; // default: stay on same chapter
 
   if (isSuccess) {
-    if (success?.effects) {
-      nextChapterId = success?.next;
-      resultEffects = success.effects;
-      message = success?.message ?? null;
-    }
-  }
-  else {
-    if (failure?.effects) {
-      resultEffects = failure.effects;
-      message = failure?.message ?? null;
-    }
+    resultEffects = success?.effects ?? [];
+    nextChapterId = success?.next ?? currentChapterId;
+    startMessage  = success?.startMessage ?? null;
+    endMessage    = success?.endMessage   ?? null;
+  } else {
+    resultEffects = failure?.effects ?? [];
+    // failure never navigates away (loop until success or player gives up)
+    startMessage  = failure?.startMessage ?? null;
+    endMessage    = failure?.endMessage   ?? null;
   }
 
-  // 2️⃣ Resolver effects (AST → delta)
-  resolved =
-    Effects.resolveActionEffects(resultEffects);
-
-  // 3️⃣ Aplicar effects
-  Engine.applyEffects(resolved.effects);
-
-  diceEvents.push(...resolved.diceEvents);  
+  // Resolve + apply branch-specific effects
+  const branchResolved = Effects.resolveActionEffects(resultEffects);
+  Engine.applyEffects(branchResolved.effects);
+  diceEvents.push(...branchResolved.diceEvents);
 
   return {
     nextChapterId,
-    resolvedEffects: resolved.effects,
+    resolvedEffects: branchResolved.effects,
     diceEvents,
-    message
+    startMessage,
+    endMessage
   };
 }
 
