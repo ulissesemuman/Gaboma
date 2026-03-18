@@ -4,6 +4,7 @@
       "label": "enemy.shadow_crawler",
       "description": "enemy.description.shadow_crawler",
       "hp": 15,
+      "xpReward": 50,
       "actions": [
         {
           "id": "void_bite",
@@ -44,7 +45,7 @@
   "enemyInstances": {
     "first_crawler": {
       "type": "shadow_crawler",
-      "respawn": "if_fled"
+      "respawn": true
     }
   }
 }

@@ -109,10 +109,9 @@ function _render(overlay) {
   modal.innerHTML = "";
 
   // Close any open var description popup on click anywhere in modal
-  // (stopPropagation on the ? button prevents this from firing when opening)
   modal.addEventListener("click", () => {
     modal.querySelectorAll(".sheet-var-desc-popup").forEach(p => p.remove());
-  });
+  }, { capture: true });
 
   const bookId   = state.currentBookId;
   const progress = state.bookState[bookId].progress;
@@ -215,6 +214,24 @@ function _buildVariables(progress, story) {
     nameEl.textContent = tb(def.label ?? varId) || varId;
     row.appendChild(nameEl);
 
+    // ? button for variable description
+    if (def.description) {
+      const descBtn = document.createElement("button");
+      descBtn.className = "sheet-var-desc-btn";
+      descBtn.textContent = "?";
+      descBtn.title = tb(def.description) || def.description;
+      descBtn.onmousedown = (e) => {
+        e.stopPropagation();
+        const existing = row.querySelector(".sheet-var-desc-popup");
+        if (existing) { existing.remove(); return; }
+        const popup = document.createElement("div");
+        popup.className = "sheet-var-desc-popup";
+        popup.textContent = tb(def.description) || def.description;
+        row.appendChild(popup);
+      };
+      nameEl.appendChild(descBtn);
+    }
+
     if (typeof value === "boolean") {
       // Boolean: show checkmark / cross
       const valEl = document.createElement("div");
@@ -246,40 +263,6 @@ function _buildVariables(progress, story) {
         ? `${value} / ${effectiveMax}`
         : String(value);
       row.appendChild(valEl);
-    }
-
-    // ? button — appended last so it sits after value in flex order
-    if (def.description) {
-      const descBtn = document.createElement("button");
-      descBtn.className = "sheet-var-desc-btn";
-      descBtn.textContent = "?";
-      descBtn.title = tb(def.description) || def.description;
-      descBtn.onclick = (e) => {
-        e.stopPropagation();
-        const modal = document.getElementById("sheet-modal");
-        const existing = modal.querySelector(".sheet-var-desc-popup");
-        if (existing) { existing.remove(); return; }
-        const popup = document.createElement("div");
-        popup.className = "sheet-var-desc-popup";
-        popup.textContent = tb(def.description) || def.description;
-        modal.appendChild(popup);
-        // Position popup over the row using getBoundingClientRect
-        const rowRect   = row.getBoundingClientRect();
-        const modalRect = modal.getBoundingClientRect();
-        popup.style.position = "absolute";
-        popup.style.left  = (rowRect.left - modalRect.left) + "px";
-        popup.style.right = (modalRect.right - rowRect.right) + "px";
-        popup.style.top   = (rowRect.bottom - modalRect.top + 3) + "px";
-        // Flip above if it would overflow viewport
-        requestAnimationFrame(() => {
-          const popRect = popup.getBoundingClientRect();
-          if (popRect.bottom > window.innerHeight - 8) {
-            popup.style.top  = "auto";
-            popup.style.bottom = (modalRect.bottom - rowRect.top + 3) + "px";
-          }
-        });
-      };
-      row.appendChild(descBtn);
     }
 
     wrap.appendChild(row);

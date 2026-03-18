@@ -128,5 +128,34 @@
   "var.agility": "Agilidade",
 
   "item.essence_potion": "Poção de Essência",
-  "item.essence_potion.desc": "Um frasco translúcido que pulsa com energia etérea concentrada."
+  "item.essence_potion.desc": "Um frasco translúcido que pulsa com energia etérea concentrada.",
+
+  "cat.accessory": "Acessório",
+  "item.iron_cloak_clasp": "Fivela de Capa de Ferro",
+  "item.iron_cloak_clasp.desc": "Uma fivela simples retirada de um viajante sem nome. Ainda prende uma capa rasgada que, surpreendentemente, ainda oferece alguma proteção.",
+  "chapter.remains.text_1": "A três dias de caminhada das montanhas, você encontra o que sobrou de alguém que passou por aqui antes. Uma capa rasgada, ossos branqueados pelo frio, e uma fivela de ferro ainda presa ao tecido. Ao lado, marcas de garras na pedra.",
+  "chapter.remains.text_2": "Quem quer que fosse, não chegou onde você quer chegar. Mas talvez tenha deixado algo útil para trás.",
+  "chapter.remains.choice.take": "Pegar a fivela e usar a capa como proteção extra",
+  "chapter.remains.choice.leave": "Deixar os pertences em paz e seguir",
+  "chapter.remains.msg.take": "A fivela está fria demais para o clima. Você a prende mesmo assim.",
+  "chapter.remains.msg.leave": "Você cobre os ossos com pedras antes de partir. Parece a coisa certa a fazer.",
+
+  "var.hp.desc": "Sua vitalidade física. Se chegar a zero, sua jornada termina.",
+  "var.strength.desc": "A força bruta do seu corpo, usada para golpear inimigos em combate.",
+  "var.agility.desc": "Sua capacidade de reagir e se mover com precisão sob pressão.",
+  "var.essence.desc": "Energia etérea acumulada no contato com o Vazio. Usada em rituais e negociações.",
+  "var.sanity.desc": "O equilíbrio da sua mente diante do incompreensível. Abaixo de certos limiares, escolhas se fecham.",
+
+  "cat.tool": "Ferramenta",
+  "var.strength": "Força",
+  "var.xp": "Pontos de experiência",  
+
+  "chapter.valoria_inscriptions.text_1": "Além do corredor, uma câmara circular interrompe a escuridão. As paredes estão cobertas de inscrições — não entalhadas, mas queimadas na pedra, como se alguém tivesse gravado cada palavra com os próprios dedos em brasa.",
+  "chapter.valoria_inscriptions.text_2": "A maioria está corroída pelo tempo. Mas alguns fragmentos resistem: um nome repetido dezenas de vezes — Valoria — e abaixo dele, uma frase que você consegue decifrar: 'Eu escolhi ser o Cadeado. Não havia outro com o Sangue. Não havia tempo. Eu falhei antes mesmo de começar.'",
+  "chapter.valoria_inscriptions.text_3": "No centro da câmara, um símbolo no chão — o mesmo que aparece na capa do diário do seu ancestral.",
+  "chapter.valoria_inscriptions.choice.read_journal": "Abrir o diário e comparar as anotações com as inscrições",
+  "chapter.valoria_inscriptions.choice.press_on": "Guardar o que viu e seguir adiante",
+  "chapter.valoria_inscriptions.narrative.read_journal": "As letras do diário e as da parede compartilham a mesma caligrafia nas margens. Seu ancestral esteve aqui.",
+  "chapter.valoria_inscriptions.msg.revelation": "As peças se encaixam de um jeito que aperta o peito. Seu ancestral conhecia Valoria. Talvez mais do que isso."  
+
 }

@@ -53,6 +53,7 @@ function resolveInstance(instanceId) {
     description: instance.description ?? baseType.description ?? null,
     hp:          instance.overrides?.hp ?? baseType.hp,
     maxHp:       instance.overrides?.hp ?? baseType.hp,
+    xpReward:    instance.overrides?.xpReward ?? baseType.xpReward,
 
     // ── combat behaviour (always from base type) ───────────────────
     actions: baseType.actions ?? [],

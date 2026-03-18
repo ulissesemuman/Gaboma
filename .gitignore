@@ -1,0 +1,13 @@
+# IDE / AI tools
+.amazonq/
+.github/
+.windsurfrules
+
+# Archives
+*.zip
+
+# Legacy / temp files
+engine/engine_old.js
+engine/expressionParser.js
+style/sheet.css1
+style/sheet.css2

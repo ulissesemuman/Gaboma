@@ -12,11 +12,14 @@
     },
     "relic": {
       "label": "cat.relic",
-      "type": "default",
-      "description": "Itens passivos que não precisam ser equipados"
+      "type": "default"
     },
     "equipment": {
       "label": "cat.equipment",
+      "type": "equippable"
+    },
+    "accessory": {
+      "label": "cat.accessory",
       "type": "equippable"
     }
   },
@@ -75,6 +78,19 @@
           { "type": "setVar", "id": "guardians_blessing_active", "value": true },
           { "type": "addVarMax", "id": "hp", "value": 5 }
         ]
+      }
+    },
+    "iron_cloak_clasp": {
+      "label": "item.iron_cloak_clasp",
+      "category": "accessory",
+      "description": "item.iron_cloak_clasp.desc",
+      "weight": 0.3,
+      "flags": ["noDrop"],
+      "onEquip": {
+        "effects": [ { "type": "addVar", "id": "hp", "value": 3 } ]
+      },
+      "onUnequip": {
+        "effects": [ { "type": "addVar", "id": "hp", "value": -3 } ]
       }
     }
   }

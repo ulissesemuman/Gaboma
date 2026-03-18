@@ -33,7 +33,7 @@
       "choices": [
         {
           "text": "chapter.farewell.choice.letter",
-          "next": "awakening",
+          "next": "mountain_remains",
           "startMessage": "chapter.farewell.msg.letter",
           "effects": [
             { "type": "addVar", "id": "sanity", "value": 3 }
@@ -41,7 +41,7 @@
         },
         {
           "text": "chapter.farewell.choice.silence",
-          "next": "awakening",
+          "next": "mountain_remains",
           "startMessage": "chapter.farewell.msg.silence",
           "effects": [
             { "type": "addVar", "id": "hp", "value": 3 }
@@ -49,6 +49,29 @@
         }
       ]
     },    
+    "mountain_remains": {
+      "text": [
+        "chapter.remains.text_1",
+        "chapter.remains.text_2"
+      ],
+      "image": "assets/chapter/mountain_remains.png",
+      "choices": [
+        {
+          "text": "chapter.remains.choice.take",
+          "next": "awakening",
+          "startMessage": "chapter.remains.msg.take",
+          "effects": [
+            { "type": "addItem", "id": "iron_cloak_clasp", "value": 1 },
+            { "type": "equipItem", "id": "iron_cloak_clasp" }
+          ]
+        },
+        {
+          "text": "chapter.remains.choice.leave",
+          "next": "awakening",
+          "startMessage": "chapter.remains.msg.leave"
+        }
+      ]
+    },
     "awakening": {
       "text": [
         "chapter.awakening.text_1",
@@ -98,10 +121,33 @@
       "choices": [
         { 
           "text": "chapter.corridor.choice.proceed", 
-          "next": "hall_of_echoes",
+          "next": "valoria_inscriptions",
           "conditions": { "hasItem": "void_fragment" }
         },
         { "text": "chapter.corridor.choice.back", "next": "awakening" }
+      ]
+    },
+    "valoria_inscriptions": {
+      "text": [
+        "chapter.valoria_inscriptions.text_1",
+        "chapter.valoria_inscriptions.text_2",
+        "chapter.valoria_inscriptions.text_3"
+      ],
+      "image": "assets/chapter/valoria_inscriptions.png",
+      "choices": [
+        {
+          "text": "chapter.valoria_inscriptions.choice.read_journal",
+          "narrative": "chapter.valoria_inscriptions.narrative.read_journal",
+          "next": "hall_of_echoes",
+          "effects": [
+            { "type": "setVar", "id": "blood_line_revealed", "value": true }
+          ],
+          "startMessage": "chapter.valoria_inscriptions.msg.revelation"
+        },
+        {
+          "text": "chapter.valoria_inscriptions.choice.press_on",
+          "next": "hall_of_echoes"
+        }
       ]
     },
     "hall_of_echoes": {

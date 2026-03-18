@@ -392,6 +392,30 @@ function startCombat(startEffect) {
 function getActiveCombatsForChapter(chapterId) {
   const combatMap = getCombatMap();
 
+  // Respawn: reset defeated instances before filtering
+  // so they appear active on the next visit to the chapter
+  Object.values(combatMap).forEach(instance => {
+    if (instance.chapterId !== chapterId) return;
+    if (instance.status !== "victory" && instance.status !== "fled_player") return;
+
+console.log("[respawn] checking:", instance.instanceId, "status:", instance.status);    
+
+    const resolved = EnemyRegistry.resolveInstance(instance.instanceId);
+console.log("[respawn] resolved.respawn:", resolved?.respawn);    
+
+    const shouldRespawn =
+      resolved.respawn === true ||
+      (resolved.respawn === "if_fled" && instance.status === "fled_player");
+
+    if (shouldRespawn) {
+      instance.status = "active";
+      instance.hp     = resolved.hp;
+      instance.maxHp  = resolved.maxHp;
+      instance.round  = 1;
+    }
+    console.log("[respawn] shouldRespawn:", shouldRespawn);
+  });
+
   return Object.values(combatMap).filter(
     instance =>
       instance.chapterId === chapterId &&

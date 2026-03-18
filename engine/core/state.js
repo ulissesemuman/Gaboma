@@ -66,6 +66,7 @@ const state = {
                   sequence: 0,
                   turn: 0,
                   _playerHpVar: null, // used internally by combat engine to track player HP without coupling it to book structure  
+                  _playerXpVar: null,
                   history: [],
                   variables: {},
                   items: {},
@@ -121,6 +122,18 @@ const state = {
     if (data.progress?.turn !== undefined) {
       bookState.progress.turn = data.progress.turn;
     }
+
+    if (data.progress?._playerHpVar !== undefined) {
+      bookState.progress._playerHpVar = data.progress._playerHpVar;
+    }
+
+    if (data.progress?._playerXpVar !== undefined) {
+      bookState.progress._playerXpVar = data.progress._playerXpVar;
+    }    
+    
+    if (data.progress?.turn !== undefined) {
+      bookState.progress.turn = data.progress.turn;
+    }    
 
     if (data.progress?.combat !== undefined) {
       ObjectUtils.mergeDynamic(bookState.progress.combat, data.progress.combat);
