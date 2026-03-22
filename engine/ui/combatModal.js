@@ -30,6 +30,324 @@ import { safeT, interpolateBook } from "../utils/i18nUtils.js";
 import { Reader } from "../core/reader.js";
 import { MessageAnimator } from "./messageAnimator.js";
 
+// ─── CSS (injected once) ──────────────────────────────────────────────────────
+
+let cssInjected = false;
+
+function injectCSS() {
+  if (cssInjected) return;
+  cssInjected = true;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    /* ── Backdrop ──────────────────────────────────────────────────── */
+    #combat-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    #combat-overlay.visible {
+      opacity: 1;
+    }
+
+    /* ── Modal box ──────────────────────────────────────────────────── */
+    #combat-modal {
+      background: var(--color-surface, #f5f0e8);
+      color: var(--color-text, #2a1a0e);
+      border-radius: 16px;
+      width: min(480px, 92vw);
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── Enemy tabs (multiple enemies) ─────────────────────────────── */
+    .combat-enemy-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .combat-enemy-tab {
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 2px solid var(--color-primary, #5a3e28);
+      background: transparent;
+      color: var(--color-primary, #5a3e28);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .combat-enemy-tab.active {
+      background: var(--color-primary, #5a3e28);
+      color: var(--color-surface, #f5f0e8);
+    }
+
+    /* ── Enemy info ─────────────────────────────────────────────────── */
+    .combat-enemy-info {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .combat-enemy-portrait {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid var(--color-primary, #5a3e28);
+      flex-shrink: 0;
+    }
+
+    .combat-enemy-portrait-placeholder {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      background: var(--color-primary, #5a3e28);
+      opacity: 0.15;
+      flex-shrink: 0;
+    }
+
+    .combat-enemy-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .combat-enemy-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-primary, #5a3e28);
+    }
+
+    .combat-enemy-desc {
+      font-size: 13px;
+      opacity: 0.75;
+      line-height: 1.4;
+    }
+
+    /* ── HP bars ────────────────────────────────────────────────────── */
+    .combat-hp-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .combat-hp-bar-track {
+      flex: 1;
+      height: 8px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .combat-hp-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--color-primary, #5a3e28);
+      transition: width 0.4s ease;
+    }
+
+    .combat-hp-bar-fill.low  { background: #c0392b; }
+    .combat-hp-bar-fill.mid  { background: #e67e22; }
+    .combat-hp-bar-fill.high { background: #27ae60; }
+
+    .combat-hp-label {
+      min-width: 52px;
+      text-align: right;
+      opacity: 0.8;
+    }
+
+    /* ── Status row ─────────────────────────────────────────────────── */
+    .combat-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      opacity: 0.7;
+      padding: 4px 0;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    /* ── Turn indicator ─────────────────────────────────────────────── */
+    .combat-turn-banner {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px;
+      border-radius: 8px;
+      background: var(--color-primary, #5a3e28);
+      color: var(--color-surface, #f5f0e8);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .combat-turn-banner.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ── Action buttons ─────────────────────────────────────────────── */
+    .combat-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .combat-action-btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 2px solid var(--color-primary, #5a3e28);
+      background: transparent;
+      color: var(--color-primary, #5a3e28);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, opacity 0.15s;
+      text-align: left;
+    }
+
+    .combat-action-btn:hover:not(:disabled) {
+      background: var(--color-primary, #5a3e28);
+      color: var(--color-surface, #f5f0e8);
+    }
+
+    .combat-action-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* ── Result message ─────────────────────────────────────────────── */
+    .combat-result-banner {
+      text-align: center;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .combat-result-banner.victory { color: #27ae60; }
+    .combat-result-banner.defeat  { color: #c0392b; }
+    .combat-result-banner.fled    { color: #7f8c8d; }
+
+    .combat-result-close {
+      display: block;
+      margin: 12px auto 0;
+      padding: 10px 28px;
+      border-radius: 24px;
+      border: none;
+      background: var(--color-primary, #5a3e28);
+      color: var(--color-surface, #f5f0e8);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── Target selector ────────────────────────────────────────────── */
+    .combat-target-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .combat-target-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.5;
+    }
+
+    .combat-target-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .combat-target-btn {
+      padding: 5px 14px;
+      border-radius: 16px;
+      border: 2px solid var(--color-primary, #5a3e28);
+      background: transparent;
+      color: var(--color-primary, #5a3e28);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .combat-target-btn.selected,
+    .combat-target-btn:hover {
+      background: var(--color-primary, #5a3e28);
+      color: var(--color-surface, #f5f0e8);
+    }
+
+    /* ── Turn popup ─────────────────────────────────────────────────── */
+    #combat-turn-popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.72);
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      padding: 10px 28px;
+      border-radius: 10px;
+      pointer-events: none;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    #combat-turn-popup.visible {
+      opacity: 1;
+    }
+
+    /* ── HP bar damage preview ──────────────────────────────────────── */
+    /* Blue bar sits below green, drains gradually; green always covers its left side */
+    .combat-hp-bar-track {
+      position: relative;
+    }
+
+    .combat-hp-bar-pending {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 4px;
+      background: #3498db;
+      z-index: 0;
+    }
+
+    .combat-hp-bar-fill {
+      position: relative;
+      z-index: 1;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let _onClose = null;
@@ -43,6 +361,8 @@ let _targetInstanceId = null;
  * @param {{ combats: Object[], chapterId: string, onClose: Function }} opts
  */
 function open({ combats, chapterId, onClose }) {
+  injectCSS();
+
   _onClose = onClose;
   _currentChapterId = chapterId;
   _targetInstanceId = combats[0].instanceId;
@@ -156,6 +476,10 @@ function _render(overlay, combats) {
     playerHpEl.id = "combat-player-hp-label";
     playerHpEl.textContent = `♥ ${playerHp}${playerHpMax ? " / " + playerHpMax : ""}`;
     statusRow.appendChild(playerHpEl);
+
+    // Low-HP warning border on the modal
+    const pct = playerHpMax > 0 ? playerHp / playerHpMax : 1;
+    modal.classList.toggle("low-hp", pct < 0.2);
   }
 
   modal.appendChild(statusRow);
@@ -240,11 +564,16 @@ async function _handleCombatAction(playerAction, combats, overlay) {
   if (banner) banner.classList.remove("visible");
 
   // Snapshot HP before action (for damage animation)
-  const bookId   = state.currentBookId;
-  const hpBefore = {};
+  const bookId      = state.currentBookId;
+  const progress    = state.bookState[bookId].progress;
+  const playerHpVar = progress._playerHpVar;
+  const hpBefore    = {};
   for (const cm of combats) {
-    hpBefore[cm.instanceId] = state.bookState[bookId].progress.combat[cm.instanceId]?.hp ?? 0;
+    hpBefore[cm.instanceId] = progress.combat[cm.instanceId]?.hp ?? 0;
   }
+  const playerHpBefore = playerHpVar ? (progress.variables[playerHpVar] ?? 0) : null;
+
+  const story = Reader.getCurrentStory();
 
   // Execute the action (sync — mutates state)
   const outcome = CombatEngine.handlePlayerAction(
@@ -308,6 +637,17 @@ async function _handleCombatAction(playerAction, combats, overlay) {
       }
       await MessageAnimator.showMessage(text, 1800);
 
+      // Show player damage feedback after enemy action
+      if (playerHpVar) {
+        const playerHpAfter = progress.variables[playerHpVar] ?? 0;
+        const dmgTaken = playerHpBefore - playerHpAfter;
+        if (dmgTaken > 0) {
+          _flashDamage();
+          await MessageAnimator.showMessage(`-${dmgTaken} HP`, 1200);
+          _updatePlayerHpLabel(playerHpAfter, progress, story);
+        }
+      }
+
     } else if (event.type === "message" && event.text) {
       await MessageAnimator.showMessage(interpolateBook(event.text));
     }
@@ -318,7 +658,7 @@ async function _handleCombatAction(playerAction, combats, overlay) {
 
   // ── End of combat ─────────────────────────────────────────────────
   if (outcome.ended) {
-    await _showResult(overlay, outcome.reason, combats, outcome.next ?? null, outcome.xpAwarded ?? 0);
+    await _showResult(overlay, outcome.reason, combats, outcome.next ?? null);
     return;
   }
 
@@ -327,7 +667,7 @@ async function _handleCombatAction(playerAction, combats, overlay) {
 
   if (activeCombats.length === 0) {
     // All enemies resolved
-    await _showResult(overlay, "victory", combats, null, 0);
+    await _showResult(overlay, "victory", combats, null);
     return;
   }
 
@@ -344,6 +684,49 @@ async function _handleCombatAction(playerAction, combats, overlay) {
  * @param {"player"|"enemy"} turn
  * @param {string|undefined} instanceId - for enemy turn, identifies which enemy
  */
+// ─── Damage Flash ─────────────────────────────────────────────────────────────
+
+/**
+ * Flashes the combat overlay red to signal player took damage.
+ * Flash in at 70% opacity, hold briefly, then fade out.
+ */
+function _flashDamage() {
+  const overlay = document.getElementById("combat-overlay");
+  if (!overlay) return;
+
+  let flash = document.getElementById("combat-damage-flash");
+  if (!flash) {
+    flash = document.createElement("div");
+    flash.id = "combat-damage-flash";
+    overlay.appendChild(flash);
+  }
+
+  // Reset any ongoing animation
+  flash.classList.remove("flash-active");
+  void flash.offsetWidth; // force reflow
+  flash.classList.add("flash-active");
+}
+
+/**
+ * Updates the player HP label in the status bar without full re-render.
+ */
+function _updatePlayerHpLabel(hp, progress, story) {
+  const el = document.getElementById("combat-player-hp-label");
+  if (!el) return;
+
+  const hpVar = progress._playerHpVar;
+  const max   = story?.variables?.[hpVar]?.max ?? null;
+  el.textContent = `♥ ${hp}${max !== null ? " / " + max : ""}`;
+
+  // Update low-HP warning on the modal
+  const modal   = document.getElementById("combat-modal");
+  const hpMax   = max ?? hp;
+  const pct     = hpMax > 0 ? hp / hpMax : 1;
+  if (modal) {
+    modal.classList.toggle("low-hp", pct < 0.2);
+  }
+}
+
 async function _showTurnPopup(turn, instanceId) {
   // Find or create the popup element inside the modal
   let popup = document.getElementById("combat-turn-popup");
@@ -414,10 +797,6 @@ async function _animateHpDrain(instanceId, hpBefore, hpAfter) {
   const pctFinal = (hpAfter / maxHp) * 100;
   fill.className = `combat-hp-bar-fill ${pctFinal > 60 ? "high" : pctFinal > 25 ? "mid" : "low"}`;
 
-  // Update HP label immediately — value is already committed to state
-  const hpLabel = fill.closest(".combat-hp-row")?.querySelector(".combat-hp-label");
-  if (hpLabel) hpLabel.textContent = `${hpAfter} / ${maxHp}`;
-
   // Blue bar drains gradually from pctBefore → pctAfter
   // It always starts where green started, so green covers its left side cleanly
   const pending = document.getElementById(fill.id + "-pending") ?? track.querySelector(".combat-hp-bar-pending");
@@ -447,7 +826,7 @@ async function _animateHpDrain(instanceId, hpBefore, hpAfter) {
   });
 }
 
-async function _showResult(overlay, reason, combats, fleeNext = null, xpAwarded = 0) {
+async function _showResult(overlay, reason, combats, fleeNext = null) {
   const modal = overlay.querySelector("#combat-modal");
   modal.innerHTML = "";
 
@@ -466,35 +845,6 @@ async function _showResult(overlay, reason, combats, fleeNext = null, xpAwarded 
   banner.className = `combat-result-banner ${cssClass}`;
   banner.textContent = labelMap[reason] ?? reason;
   modal.appendChild(banner);
-
-  // ── XP and level-up messages (victory only, xpAwarded > 0) ──────
-  if (reason === "victory" && xpAwarded > 0) {
-    const progress  = state.bookState[state.currentBookId].progress;
-    const xpVarId   = progress._playerXpVar;
-    const story     = Reader.getCurrentStory();
-    const xpVarDef  = story?.variables?.[xpVarId];
-    const xpVarName = xpVarDef?.label ? tb(xpVarDef.label) : (xpVarId ?? "XP");
-
-    // Message 1: XP gained
-    const xpMsg = document.createElement("div");
-    xpMsg.className = "combat-xp-message";
-    xpMsg.textContent = `+${xpAwarded} ${xpVarName}`;
-    modal.appendChild(xpMsg);
-
-    // Message 2: level-up notifications (one per level gained)
-    const pending = progress._pendingLevelUps ?? [];
-    progress._pendingLevelUps = []; // consume
-
-    pending.forEach(lu => {
-      const lvlMsg = document.createElement("div");
-      lvlMsg.className = "combat-levelup-message";
-      const levelLabel = lu.label ?? `Level ${lu.level}`;
-      lvlMsg.textContent = `⬆ ${levelLabel}!`;
-      modal.appendChild(lvlMsg);
-    });
-
-    state.save();
-  }
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "combat-result-close";

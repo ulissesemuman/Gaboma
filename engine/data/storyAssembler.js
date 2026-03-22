@@ -1,11 +1,12 @@
 import { FetchUtils } from "../utils/fetchUtils.js";
+import { getBookBasePath } from "./bookLoader.js";
 
 export async function loadBookStory(bookId) {
   if (!bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-  const basePath = `books/${bookId}/story`;
+  const basePath = `${getBookBasePath(bookId)}/story`;
 
   const story = await FetchUtils.fetchJSON(`${basePath}/story.json`);
 

@@ -6,6 +6,19 @@ import { ThemeManager } from "../ui/themeManager.js";
 import { FontManager } from "../ui/fontManager.js";
 import { StoryAssembler } from "./storyAssembler.js";
 
+// ---------- External book URL support ----------
+
+let _externalBookUrl = null;
+
+export function setExternalBookUrl(url) {
+  _externalBookUrl = url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
+export function getBookBasePath(bookId) {
+  if (_externalBookUrl) return _externalBookUrl;
+  return `books/${bookId}`;
+}
+
 // ---------- Manifest ----------
 
 async function loadBookManifest(bookId) {
@@ -13,7 +26,7 @@ async function loadBookManifest(bookId) {
     throw new Error(t("error.invalidBook"));
   }
 
-  return FetchUtils.fetchJSON(`books/${bookId}/book.json`);
+  return FetchUtils.fetchJSON(`${getBookBasePath(bookId)}/book.json`);
 }
 
 // ---------- Library ----------
@@ -47,7 +60,7 @@ export async function loadBookLanguageList(bookId) {
   }
 
   return FetchUtils.fetchJSON(
-    `books/${bookId}/language/index.json`
+    `${getBookBasePath(bookId)}/language/index.json`
   );
 }
 
@@ -59,7 +72,7 @@ export async function loadBookLocalizedData(bookId) {
   const language = await resolveBookLanguage(bookId);
 
   return FetchUtils.fetchJSON(
-    `books/${bookId}/language/${language}.json`
+    `${getBookBasePath(bookId)}/language/${language}.json`
   );
 }
 
@@ -153,6 +166,10 @@ export async function initBookState(bookId) {
   if (!bookId) {
     throw new Error(t("error.invalidBook"));
   }
+
+  // Reset immediately — before any awaits — so no stale state
+  // (gameOver, combat, chaptersVisited, etc.) leaks into the new run
+  delete state.bookState[bookId];  
 
   const book = getCurrentBook();
   const story = book.story;
@@ -261,7 +278,7 @@ export function loadBookCSS(bookId) {
 
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = `books/${bookId}/style.css`;
+  link.href = `${getBookBasePath(bookId)}/style.css`;
   link.id = "gaboma-book-style";
   document.head.appendChild(link);
 }
@@ -286,5 +303,7 @@ export const BookLoader = {
   loadBook,
   getBookHomeConfig,
   loadBookCSS,
-  unloadBookCSS
+  unloadBookCSS,
+  getBookBasePath,
+  setExternalBookUrl
 };

@@ -229,7 +229,7 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
         <img
           id="book-cover"
           class="book-cover"
-          src="books/${bookId}/assets/covers/${coverImg}"
+          src="${BookLoader.getBookBasePath(bookId)}/assets/${coverImg}"
           alt="${localized.title}"
         />
         <button id="toggle-cover" title="Virar capa">
@@ -275,7 +275,7 @@ function renderBookHome(bookId, localized, bookHomeConfig) {
 
       let img = document.getElementById("book-cover");
 
-      img.src = `books/${bookId}/assets/covers/${coverImg}`;
+      img.src = `${BookLoader.getBookBasePath(bookId)}/assets/${coverImg}`;
     };
   }   
   else
@@ -386,8 +386,7 @@ function _showGameOverScreen(readerEl, bookId) {
   restartBtn.className = "game-over-btn";
   restartBtn.textContent = safeT("gameover.restart") ?? "Reiniciar do início";
   restartBtn.onclick = async () => {
-    const { initBookState } = await import("../data/bookLoader.js");
-    await initBookState(bookId);
+    await BookLoader.initBookState(bookId);
     const newChapter = Reader.startStory();
     renderReader(newChapter.id);
   };
@@ -427,13 +426,11 @@ export function renderReader(chapterId) {
 
     // ── Chapter image (shown after text/narrative, before buttons) ──────
   if (chapter.image) {
-    const bookLoader = window._gaboma?.BookLoader;
-    const bookPath   = bookLoader?.getBookPath?.(bookId) ?? `books/${bookId}`;
     const wrap = document.createElement("div");
     wrap.className = "chapter-image-wrap";
     const img = document.createElement("img");
     img.className = "chapter-image";
-    img.src = `${bookPath}/${chapter.image}`;
+    img.src = `${BookLoader.getBookBasePath(bookId)}/${chapter.image}`;
     img.alt = "";
     wrap.appendChild(img);
     readerEl.appendChild(wrap);
@@ -1075,7 +1072,7 @@ function registerVisualEvent(event) {
 
 // ---------- Init ----------
 
-async function init() {
+async function init(bookUrl = null) {
   state.load();
 
   await FontManager.loadGoogleFonts();
@@ -1085,12 +1082,25 @@ async function init() {
   const language = resolveUILanguage();
 
   await loadUILanguage(language);
-  
-  await openLibrary();
+
+  if (bookUrl) {
+    BookLoader.setExternalBookUrl(bookUrl);
+    // Derive a stable bookId from the last path segment
+    const bookId = bookUrl.split("/").filter(Boolean).pop();
+    await BookLoader.loadBook(bookId);
+    BookLoader.loadBookCSS(bookId);
+    await openBookHome();
+  } else {
+    await openLibrary();
+  }
 
   renderBottomBar();
 
-  DebugPanel.initDebugPanel();  
+  DebugPanel.initDebugPanel();
+
+  // Expose renderReader for debug panel chapter navigation
+  window._gaboma = window._gaboma ?? {};
+  window._gaboma.renderReader = renderReader;
 }
 
 export const UIManager = {

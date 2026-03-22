@@ -351,6 +351,9 @@ function startCombat(startEffect) {
     return;
   }
 
+  // Reset any respawnable instances for this chapter before checking
+  resetRespawnableInstances(chapterId);
+
   if (!EnemyRegistry.shouldStartCombat(combatMap, instanceId, resolved)) {
     return; // resume existing or skip permanently defeated
   }
@@ -389,23 +392,23 @@ function startCombat(startEffect) {
  * @param {string} chapterId
  * @returns {Object[]}
  */
-function getActiveCombatsForChapter(chapterId) {
+/**
+ * Resets combat instances that should respawn on chapter entry.
+ * Called by startCombat (via onEnter) — not on re-renders.
+ */
+function resetRespawnableInstances(chapterId) {
   const combatMap = getCombatMap();
 
-  // Respawn: reset defeated instances before filtering
-  // so they appear active on the next visit to the chapter
   Object.values(combatMap).forEach(instance => {
     if (instance.chapterId !== chapterId) return;
     if (instance.status !== "victory" && instance.status !== "fled_player") return;
 
-console.log("[respawn] checking:", instance.instanceId, "status:", instance.status);    
-
     const resolved = EnemyRegistry.resolveInstance(instance.instanceId);
-console.log("[respawn] resolved.respawn:", resolved?.respawn);    
+    const respawn  = resolved.respawn;
 
     const shouldRespawn =
-      resolved.respawn === true ||
-      (resolved.respawn === "if_fled" && instance.status === "fled_player");
+      respawn === true ||
+      (respawn === "if_fled" && instance.status === "fled_player");
 
     if (shouldRespawn) {
       instance.status = "active";
@@ -413,8 +416,11 @@ console.log("[respawn] resolved.respawn:", resolved?.respawn);
       instance.maxHp  = resolved.maxHp;
       instance.round  = 1;
     }
-    console.log("[respawn] shouldRespawn:", shouldRespawn);
   });
+}
+
+function getActiveCombatsForChapter(chapterId) {
+  const combatMap = getCombatMap();
 
   return Object.values(combatMap).filter(
     instance =>
@@ -635,6 +641,7 @@ export const CombatEngine = {
   startCombat,
   handlePlayerAction,
   getActiveCombatsForChapter,
+  resetRespawnableInstances,
   getAvailablePlayerActions,
   resolveEnemyAction  // exported for debug/testing
 };
